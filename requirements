@@ -1,0 +1,22 @@
+pyyaml
+paramiko
+flask==2.2.2
+flask-apscheduler
+Flask-SocketIO==5.2.0
+selectolax
+aiohttp
+requests
+requests-toolbelt
+# zoo
+pillow
+# tensorflow-cpu
+# tf-models-official
+# fedora
+# sudo apt-get install opencv*
+# ubuntu
+# sudo apt-get install python3-opencv
+# opencv-python
+pandas
+numpy
+akshare
+exifread
