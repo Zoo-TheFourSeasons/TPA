@@ -1,0 +1,19 @@
+SETTING:
+  HOSTS:
+    LOCAL: '--ssh_user *** --ssh_psw ***'
+  NODES: [LOCAL]
+  TIMING:
+    STATUS: False
+    TRIGGER: '--trigger cron --year 2050 --month * --day * --day_of_week * --hour 0 --minute 0 --second 0'
+
+COMMAND:
+  - FUNC: en_decrypt.assistant.EncryptHelper.timing
+    ARGS:
+      - en_decrypt
+      - FH/zoo,FH/user,FH/timing,FH/star,FH/squirrel,FH/security,FH/know,FH/history,FH/finansis,FH/dsp,FH/spatiotemporal,FH/en_decrypt/data
+      - ENCRYPT
+      - /home/zin/Desktop/_K/TOKEN/TPA.token
+    KWARGS: {}
+
+
+
