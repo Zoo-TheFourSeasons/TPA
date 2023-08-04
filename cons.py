@@ -40,7 +40,7 @@ class Apps(object):
         if app == APP_DSP:
             return app + ':yfd', app + ':yft'
         elif app == APP_KNO:
-            return app + ':site', app + ':doc'
+            return app + ':site', app + ':dom'
         elif app == APP_ZOO:
             return app + ':images',
         elif app == APP_FIN:
