@@ -10,7 +10,7 @@ COMMAND:
   - FUNC: en_decrypt.assistant.EncryptHelper.timing
     ARGS:
       - en_decrypt
-      - FH/zoo,FH/user,FH/timing,FH/star,FH/squirrel,FH/security,FH/know,FH/history,FH/finansis,FH/dsp,FH/spatiotemporal,FH/en_decrypt/data
+      - TPA/zoo,TPA/user,TPA/timing,TPA/star,TPA/squirrel,TPA/security,TPA/know,TPA/history,TPA/finansis,TPA/dsp,TPA/spatiotemporal,TPA/en_decrypt/data
       - ENCRYPT
       - /home/zin/Desktop/_K/TOKEN/TPA.token
     KWARGS: {}

@@ -10,7 +10,7 @@ COMMAND:
   - FUNC: en_decrypt.assistant.EncryptHelper.timing
     ARGS:
       - en_decrypt
-      - FH/zoo,FH/user,FH/timing,FH/star,FH/squirrel/assistant.py,FH/squirrel/before.py,FH/squirrel/bp.py,FH/squirrel/cons.py,FH/security,FH/know,FH/history,FH/finansis,FH/dsp,FH/spatiotemporal,FH/en_decrypt/data
+      - TPA/zoo,TPA/user,TPA/timing,TPA/star,TPA/squirrel/assistant.py,TPA/squirrel/before.py,TPA/squirrel/bp.py,TPA/squirrel/cons.py,TPA/security,TPA/know,TPA/history,TPA/finansis,TPA/dsp,TPA/spatiotemporal,TPA/en_decrypt/data
       - DECRYPT
       - /home/zin/Desktop/_K/TOKEN/FH.token
     KWARGS: {}
