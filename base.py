@@ -142,7 +142,7 @@ def data_paging_for_pickle(request, _ins, key_name, exclude=None, fields=None):
 
 def make_response_with_headers(data):
     r = make_response(data)
-    r.headers['Server'] = 'FH'
+    r.headers['Server'] = 'TPA'
     r.headers['Connection'] = 'Keep-Alive'
     r.headers['Access-Control-Allow-Credentials'] = 'true'
     return r
@@ -633,7 +633,7 @@ class MetaFile(object):
         fp = opjn(ap, dfp)
         if not opap(fp).startswith(ap):
             raise ValueError('unknown target: %s' % dfp)
-        # fp = '/home/zin/Desktop/_Y/FH/timing/data/ENCRYPT.tim'
+        # fp = '/home/zin/Desktop/_Y/TPA/timing/data/ENCRYPT.tim'
         return fp
 
     @classmethod
@@ -645,7 +645,7 @@ class MetaFile(object):
         fp = opjn(ap, target)
         if not opap(fp).startswith(ap):
             raise ValueError('unknown target: %s' % target)
-        # fp = '/home/zin/Desktop/_Y/FH/star/data/STARS.sta'
+        # fp = '/home/zin/Desktop/_Y/TPA/star/data/STARS.sta'
         return fp
 
     @classmethod
@@ -665,7 +665,7 @@ class MetaFile(object):
             return opdn(PATH_PROJECT)
         dp = opjn(opjn(PATH_PROJECT, a), 'data')
         dp = dp if not e else opjn(dp, e)
-        # dp = '/home/zin/Desktop/_Y/FH/timing/data'
+        # dp = '/home/zin/Desktop/_Y/TPA/timing/data'
         return dp
 
     @classmethod
@@ -1440,11 +1440,11 @@ class MetaFile(object):
         return prefix + tmp
 
     @staticmethod
-    def sf_path_fh():
+    def sf_path_project():
         fp = os.path.dirname(os.path.abspath(__file__))
         if os.path.exists(fp):
             return fp
-        raise FileNotFoundError('project FH not found: %s' % fp)
+        raise FileNotFoundError('project not found: %s' % fp)
 
     @classmethod
     def sf_path_open_sources(cls):
@@ -1471,7 +1471,7 @@ class MetaFile(object):
             'IP_WEEKLY': self.sf_ip_weekly,
             'IP_MONTHLY': self.sf_ip_monthly,
             'GET_TS_VERSION': self.sf_ts_version,
-            'PATH_FH': self.sf_path_fh,
+            'PATH_PROJECT': self.sf_path_project,
             'PATH_OPEN_SOURCES': self.sf_path_open_sources,
             'CURRENT_HISTORY': self.sf_current_history,
         }
