@@ -1,0 +1,84 @@
+{% set title = '╮(﹀_﹀”)╭' %}
+
+{% extends "index.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block ops %}
+    <button hidden id="commit" class="btn btn-view-file" data-bs-toggle="tooltip" data-bs-placement="bottom"
+            title="COMMIT">
+        <i class="fas fa-fw fa-code-commit"></i></button>
+    <button hidden class="btn download btn-view-file" data-bs-toggle="tooltip" data-bs-placement="bottom"
+            title="DOWNLOAD">
+        <i class="fas fa-fw fa-download"></i></button>
+    <button hidden class="btn spatiotemporal btn-view-file" data-bs-toggle="tooltip" data-bs-placement="bottom"
+            title="SPATIO">
+        <i class="fas fa-fw fa-space-shuttle"></i>
+    </button>
+    <button hidden id="execute" class="btn execute btn-view-file" data-bs-toggle="tooltip"
+            data-bs-placement="bottom"
+            title="EXECUTE"><i class="fas fa-fw fa-play"></i></button>
+    <button hidden id="execute_ctx" class="btn execute btn-view-file" data-bs-toggle="tooltip"
+            data-bs-placement="bottom" title="EXECUTE CTX"><i class="fas fa-fw fa-arrow-up-short-wide"></i>
+    </button>
+    <button hidden class="btn pause btn-view-file" data-bs-toggle="tooltip" data-bs-placement="bottom"
+            title="PAUSE">
+        <i class="fas fa-fw fa-pause"></i></button>
+    <button hidden class="btn stop btn-view-file" data-bs-toggle="tooltip" data-bs-placement="bottom"
+            title="STOP"><i
+            class="fas fa-fw fa-stop"></i></button>
+    <button class="btn" data-bs-toggle="offcanvas" title="OUTPUT"
+            data-bs-placement="bottom"
+            data-bs-target="#his" aria-controls="offcanvasNavbar">
+        <i class="fas fa-fw fa-history"></i>
+    </button>
+{% endblock %}
+{% block js %}
+    <script>
+        let target = $.url().param('target');
+        let Model = Object.create(ModelFH);
+        Model.$table = $table;
+        Model.target = target;
+        Model.signal = 'task';
+        Model.app = 'dsp:yfd';
+
+        Model.font = {
+            'u': '/webs/' + Model.app + '/index'
+        };
+        Model.index = {
+            'u': '/' + Model.app + '/index',
+            'f': function () {
+                list_for_table(this, Model, undefined);
+            }
+        };
+        Model.deletes = {
+            'u': '/' + Model.app + '/delete',
+            '$btn': $("#delete"),
+            'f': function () {
+                confirm_do_with_table(this, Model, "DELETE");
+            }
+        };
+        Model.mkdir = {
+            'u': '/' + Model.app + '/mkdir',
+            'modal_id': 'mkdir-modal',
+            '$btn': $("#mkdir-modal .commit-btn"),
+            'f': function () {
+                commit_from_model(this, Model, true)
+            }
+        };
+        Model.touch = {
+            'u': '/' + Model.app + '/touch',
+            'suffix': '.yfd',
+            'modal_id': 'touch-modal',
+            '$btn': $("#touch-modal .commit-btn"),
+            'f': function () {
+                commit_from_model(this, Model, true)
+            },
+        };
+
+        $(document).ready(function () {
+            Model.index.f();
+            Model.mkdir.f();
+            Model.touch.f();
+            Model.deletes.f();
+        })
+    </script>
+{% endblock %}

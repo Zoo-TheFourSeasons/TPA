@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>LOGIN</title>
+    <link href="/static/bootstrap-5.1.3-dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/jquery-confirm-v3.3.4/dist/jquery-confirm.min.css" rel="stylesheet" type="text/css">
+    <link rel="icon" type="image/x-icon" href="/static/fh/book-skull-solid.svg">
+    <style>
+        html,
+        body {
+            height: 90%;
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            padding-top: 40px;
+            padding-bottom: 40px;
+            background-color: #f5f5f5;
+        }
+
+        .form-user {
+            width: 25%;
+            padding: 15px;
+            margin: auto;
+        }
+
+        .form-user .form-floating:focus-within {
+            z-index: 2;
+        }
+
+        .form-user input[type="password"] {
+            margin-bottom: 10px;
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+        }
+    </style>
+</head>
+<body class="text-center">
+<main class="form-user" id="login">
+    <form>
+        <h1 class="h3 mb-3 fw-normal"></h1>
+
+        <div class="form-floating">
+            <input type="text" id="nm" name="nm" class="form-control f-data" placeholder="名" required autofocus>
+            <label for="name">名:</label>
+        </div>
+        <div class="form-floating">
+            <input type="password" id="pw" name="pw" class="form-control f-data" placeholder="令" required>
+            <label for="password">令:</label>
+        </div>
+        <h1 class="h3 mb-3 fw-normal"></h1>
+        <div class="btn-group full">
+            <button class="btn btn-lg btn-primary btn-block" id="commit" type="button">LOGIN</button>
+            <a href="/register" class="btn btn-lg btn-outline-secondary">R</a>
+        </div>
+    </form>
+</main>
+</body>
+<script src="/static/jquery/jquery-3.6.0.min.js"></script>
+<script src="/static/jquery-confirm-v3.3.4/dist/jquery-confirm.min.js"></script>
+<script src="/static/bootstrap-5.1.3-dist/js/bootstrap.min.js"></script>
+<script src="/static/axios-0.27.2/dist/axios.min.js"></script>
+<script src="/static/purl-v2.3.1/purl.js"></script>
+<script src="/static/fh/business+.js"></script>
+<script>
+    $(document).ready(function () {
+        let next = $.url().param('next');
+        let user = Object.create(DSPM);
+        user.app = 'user';
+
+        $("#commit").on('click', function () {
+            let params = {
+                'url': '/' + user.app + '/login',
+                'btn': $(this),
+                'data': user.json('login'),
+                'success': function (rsp) {
+                    console.log(rsp);
+                    if (next !== undefined){
+                        {#let tmp = '/' + next + '?tk=' + rsp.data.tk;#}
+                        window.location.assign(tmp);
+                     } else {
+                        window.location.assign('/?tk=' + rsp.data.tk);
+                     }
+                }
+            };
+            user.get(params);
+        });
+    });
+</script>
+</html>

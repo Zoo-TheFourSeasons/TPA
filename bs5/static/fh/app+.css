@@ -1,0 +1,68 @@
+:root {
+    --bs-font-sans-serif: "YaHei Consolas Hybrid", Consolas, "微软雅黑", "Meiryo UI", "Malgun Gothic", "Segoe UI", "Trebuchet MS", Helvetica, Monaco, courier, monospace;
+}
+
+.content-page {
+    overflow: hidden;
+    min-height: 100px
+}
+
+.search {
+    padding: 0 24px;
+    min-height: 50px;
+    position: fixed;
+    left: 190px;
+    top: 0;
+    right: 0;
+    z-index: 1001
+}
+
+.page-title-right {
+    float: right;
+}
+
+.modal-footer {
+    justify-content: space-between;
+}
+
+.table > :not(caption) > * > * {
+    padding: .1rem .1rem;
+}
+
+.btn-group-sm > .btn, .btn-sm {
+    padding: .1rem .5rem;
+    font-size: .705rem;
+    border-radius: .2rem
+}
+
+
+.offcanvas-end {
+    width: 50%;
+}
+
+pre {
+    font-size: 0.86em;
+    line-height: 1.2;
+    height: 98%;
+}
+
+textarea {
+    font-size: 0.86em !important;
+    line-height: 1.4 !important;
+}
+
+.nav-link {
+    color: #a0a0a0;
+}
+
+.active {
+    color: white;
+}
+
+.nav-link:focus, .nav-link:hover {
+    color: #c0c077;
+}
+
+.spatio td {
+    padding: 4px !important;
+}

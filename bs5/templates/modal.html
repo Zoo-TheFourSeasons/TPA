@@ -1,0 +1,520 @@
+<!-- VIEW Modal -->
+<div id="view-modal" class="modal" tabindex="-1" aria-labelledby="view-header"
+     style="display: none;" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-dark p-2">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal"><i
+                            class="fas fa-fw fa-close"></i>
+                    </button>
+                    <button type="submit" class="btn btn-outline-warning commit-btn" data-bs-dismiss="modal"><i
+                            class="fas fa-fw fa-code-commit"></i>
+                    </button>
+                </div>
+                <h4 class="modal-title text-white" id="view-header">VIEW</h4>
+            </div>
+            <div class="modal-body px-2 pt-2 pb-0">
+                <div class="input-group mb-2">
+                    <span class="input-group-text">TARGET</span>
+                    <input type="text" class="form-control f-data" readonly name="target" aria-label="PATH OUT">
+                </div>
+                <div class="write-mdg-box mb-2" id="view-editor">
+                    <textarea style="display:none;" class="form-control f-data" name="text" spellcheck="false"
+                              tabindex="0"
+                              wrap="off"></textarea>
+                    <img class="img-fluid" src="">
+                </div>
+                <div class="input-group mb-2">
+                    <table style="table-layout: auto"
+                           class="table-striped table-hover table-bordered table-condensed table-centered table-nowrap mb-0">
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer px-2 pb-2">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- VIEW EXE Modal -->
+<div id="view-exe-modal" class="modal" tabindex="-1" aria-labelledby="view-exe-header"
+     style="display: none;" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-dark p-2">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal"><i
+                            class="fas fa-fw fa-close"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-warning commit-btn"><i
+                            class="fas fa-fw fa-code-commit"></i>
+                    </button>
+                    <button id="view-execute-btn" type="submit" class="btn btn-outline-light execute-btn"><i
+                            class="fas fa-fw fa-play"></i>EXECUTE
+                    </button>
+                    <button type="button" class="btn btn-outline-light" data-bs-toggle="offcanvas"
+                            data-bs-target="#his" aria-controls="offcanvasNavbar">
+                        <i class="fas fa-fw fa-history"></i>
+                    </button>
+                </div>
+                <h4 class="modal-title text-white" id="view-exe-header">VIEW</h4>
+            </div>
+            <div class="modal-body px-2 pt-2 pb-0">
+                <div class="input-group mb-2">
+                    <span class="input-group-text">TARGET</span>
+                    <input type="text" class="form-control f-data" readonly name="target" aria-label="PATH OUT">
+                </div>
+                <div class="write-mdg-box mb-2" id="view-exe-editor">
+                    <textarea class="form-control f-data" rows="40" name="text" spellcheck="false" tabindex="0"
+                              wrap="off"></textarea>
+                    <img class="img-fluid" src="">
+                </div>
+                <div class="input-group mb-2">
+                    <table style="table-layout: auto"
+                           class="table-striped table-hover table-bordered table-condensed table-centered table-nowrap mb-0">
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer px-2 pb-2">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- STAR Modal -->
+{#<div id="star-modal" class="modal" tabindex="-1" aria-labelledby="star-header"#}
+{#     style="display: none;" aria-hidden="true">#}
+{#    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">#}
+{#        <div class="modal-content">#}
+{#            <div class="modal-header bg-dark p-2">#}
+{#                <div class="btn-group">#}
+{#                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal"><i#}
+{#                            class="fas fa-fw fa-close"></i>#}
+{#                    </button>#}
+{#                    <button type="button" class="btn btn-outline-warning commit-btn" data-bs-dismiss="modal"><i#}
+{#                            class="fas fa-fw fa-code-commit"></i>#}
+{#                    </button>#}
+{#                </div>#}
+{#                <h4 class="modal-title text-white" id="mkdir-header">STAR</h4>#}
+{#            </div>#}
+{#            <div class="modal-body px-2 pt-2 pb-0">#}
+{#                <div class="mb-2">#}
+{#                    <input type="text" value="DEFAULT" class="form-control f-data" name="bookmark" placeholder="BOOKMARK">#}
+{#                </div>#}
+{#            </div>#}
+{#            <div class="modal-footer px-2 pb-2">#}
+{#            </div>#}
+{#        </div>#}
+{#    </div>#}
+{#</div>#}
+
+<!-- MKDIR Modal -->
+<div id="mkdir-modal" class="modal" tabindex="-1" aria-labelledby="mkdir-header"
+     style="display: none;" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-dark p-2">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal"><i
+                            class="fas fa-fw fa-close"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-warning commit-btn" data-bs-dismiss="modal"><i
+                            class="fas fa-fw fa-code-commit"></i>
+                    </button>
+                </div>
+                <h4 class="modal-title text-white" id="mkdir-header">MKDIR</h4>
+            </div>
+            <div class="modal-body px-2 pt-2 pb-0">
+                <div class="mb-2">
+                    <input type="text" class="form-control f-data" name="target" placeholder="MKDIR">
+                </div>
+            </div>
+            <div class="modal-footer px-2 pb-2">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ENCRYPT/DECRYPT Modal -->
+<div id="en-decrypt-modal" class="modal" tabindex="-1" aria-labelledby="en-decrypt-header"
+     style="display: none;" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-dark p-2">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal"><i
+                            class="fas fa-fw fa-close"></i>
+                    </button>
+                    <button type="submit" class="btn btn-outline-warning commit-btn" data-bs-dismiss="modal"><i
+                            class="fas fa-fw fa-code-commit"></i>
+                    </button>
+                </div>
+                <h4 class="modal-title text-white" id="en-decrypt-header">EN-DECRYPT</h4>
+            </div>
+            <div class="modal-body px-2 pt-2 pb-0">
+                <div class="mb-2">
+                    <label class="form-label">AES PSW*</label>
+                    <input type="text" class="form-control f-data" name="psw_aes"
+                           placeholder="AES PASSWORD FOR EN-DECRYPT, ******ZOO">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">STREAM PSW*</label>
+                    <input type="text" class="form-control f-data" name="psw_stream"
+                           placeholder="STREAM PASSWORD FOR EN-DECRYPT, ------ZOO">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">NONCE*</label>
+                    <input type="text" class="form-control f-data" name="nonce"
+                           placeholder="NONCE FOR EN-DECRYPT, 159-162-">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">TYPE</label>
+                    <select class="form-control f-data" name="type">
+                        <option class="form-control" value="DECRYPT">DECRYPT 解密</option>
+                        <option class="form-control" value="ENCRYPT">ENCRYPT 加密</option>
+                    </select>
+                </div>
+                <input type="text" hidden name="target" class="f-data" placeholder="TARGET">
+            </div>
+            <div class="modal-footer px-2 pb-2">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- separate Modal -->
+<div id="separate-modal" class="modal" tabindex="-1" aria-labelledby="separate-header"
+     style="display: none;" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-dark p-2">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal"><i
+                            class="fas fa-fw fa-close"></i>
+                    </button>
+                    <button type="submit" class="btn btn-outline-warning commit-btn" data-bs-dismiss="modal"><i
+                            class="fas fa-fw fa-code-commit"></i>
+                    </button>
+                </div>
+                <h4 class="modal-title text-white" id="en-decrypt-header">SEPARATE</h4>
+            </div>
+            <div class="modal-body px-2 pt-2 pb-0">
+                <div class="mb-2">
+                    <label class="form-label">TYPE*</label>
+                    <select class="form-control f-data" name="type">
+                        <option class="form-control" value="COMBINE">COMBINE</option>
+                        <option class="form-control" value="SEPARATE">SEPARATE</option>
+                    </select>
+                </div>
+
+                <div class="mb-2">
+                    <label class="form-label">SEPARATE MAX SIZE*</label>
+                    <input type="number" class="form-control f-data" name="max_size" value="40"
+                           placeholder="SEPARATE MAX SIZE">
+                </div>
+                <input type="text" hidden name="target" class="f-data" placeholder="TARGET">
+            </div>
+            <div class="modal-footer px-2 pb-2">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- TOUCH Modal -->
+<div id="touch-modal" class="modal" tabindex="-1" aria-labelledby="touch-header"
+     style="display: none;" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-dark p-2">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal"><i
+                            class="fas fa-fw fa-close"></i>
+                    </button>
+                    <button type="submit" class="btn btn-outline-warning commit-btn" data-bs-dismiss="modal"><i
+                            class="fas fa-fw fa-code-commit"></i>
+                    </button>
+                </div>
+                <h4 class="modal-title text-white" id="touch-header">TOUCH YAML</h4>
+            </div>
+            <div class="modal-body px-2 pt-2 pb-0">
+                <div class="input-group mb-2">
+                    <span class="input-group-text">TARGET*</span>
+                    <input type="text" class="form-control f-data" name="target" aria-label="PATH OUT">
+{#                    <span class="input-group-text">.yaml</span>#}
+                </div>
+                <div class="mb-2" id="touch-editor">
+                     <textarea class="form-control f-data" rows="40" name="text" spellcheck="false"
+                               tabindex="0" wrap="off"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer px-2 pb-2">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Image Operates Modal -->
+<div id="operates-modal" class="modal" tabindex="-1" aria-labelledby="operates-header" style="display: none;"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-dark p-2">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal"><i
+                            class="fas fa-fw fa-close"></i>
+                    </button>
+                    <button type="submit" class="btn btn-outline-warning commit-btn" data-bs-dismiss="modal"><i
+                            class="fas fa-fw fa-code-commit"></i>
+                    </button>
+                </div>
+                <h4 class="modal-title text-white" id="operates-header">IMAGE OPERATE</h4>
+            </div>
+            <div class="modal-body px-2 pt-2 pb-0">
+                <input type="text" hidden name="target" class="f-data">
+                <div class="mb-2">
+                    <label class="form-label">OPERATE</label>
+                    <select data-width="100%"
+                            data-style="btn-info btn-sm"
+                            class="selectpicker pl-2 f-data" name="operate" id="operate">
+                        <option value="IMAGES_TO_VIDEO">IMAGES TO VIDEO</option>
+                        <option selected value="ROTATE+RESIZE+INK">ROTATE + RESIZE + INK</option>
+                        <option value="RECTANGLE">RECTANGLE(INNER)</option>
+                    </select>
+                </div>
+                <ul class="list-group p-0 pb-2 images">
+                    <li class="list-group-item p-1">
+                        <label class="form-label"><strong>IMAGES</strong></label>
+                        <div class="row">
+                            <div class="col-6">
+                                <label class="form-label">SIZE-MAX</label>
+                                <input type="number" class="form-control f-data" name="size_max" value="2800">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">INK-RATIO</label>
+                                <input type="number" class="form-control f-data" name="ratio_ink" value="600">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <label class="form-label">INK-POSITION</label>
+                                <select class="form-control f-data" name="position_ink">
+                                    <option selected value="bottom right">BOTTOM RIGHT</option>
+                                    <option selected value="bottom center">BOTTOM CENTER</option>
+                                    <option selected value="bottom left">BOTTOM LEFT</option>
+                                    <option selected value="top right">TOP RIGHT</option>
+                                    <option selected value="top center">TOP CENTER</option>
+                                    <option selected value="top left">TOP LEFT</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">INK-FULL</label>
+                                <select class="form-control f-data" name="full_ink">
+                                    <option selected value="ON">ON</option>
+                                    <option selected value="OFF">OFF</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="form-label">INK-BLACK</label>
+                            <input type="text" value="/home/zin/Desktop/_Y/FH/zoo/data/black.png"
+                                   class="form-control f-data" name="path_ink_black">
+                        </div>
+                        <div>
+                            <label class="form-label">INK-WHITE</label>
+                            <input type="text" value="/home/zin/Desktop/_Y/FH/zoo/data/white.png"
+                                   class="form-control f-data" name="path_ink_white">
+                        </div>
+                    </li>
+                </ul>
+                <ul hidden class="list-group p-0 pb-2 video">
+                    <li class="list-group-item p-1">
+                        <label class="form-label"><strong>VIDEO</strong></label>
+                        <div class="mb-2">
+                            <label class="form-label">PREFIX</label>
+                            <input type="text" value="/home/zin/Desktop/_Y/FH/zoo/data/video_prefix.jpg"
+                                   class="form-control f-data" name="video_prefix">
+                        </div>
+                        <div>
+                            <label class="form-label">SUFFIX</label>
+                            <input type="text" value="/home/zin/Desktop/_Y/FH/zoo/data/video_suffix.jpg"
+                                   class="form-control f-data" name="video_suffix">
+                        </div>
+                        <div>
+                            <label class="form-label">FPS</label>
+                            <input type="text" class="form-control f-data" name="video_fps" value="0.75">
+                        </div>
+                    </li>
+                </ul>
+                <ul hidden class="list-group p-0 pb-2  rectangle">
+                    <li class="list-group-item p-1">
+                        <label class="form-label"><strong>RECTANGLE</strong></label>
+                        <div class="row">
+                            <div class="col-6">
+                                <label class="form-label">WIDTH</label>
+                                <input type="number" value="20" class="form-control f-data" name="rectangle_width">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">COLOR</label>
+                                <input type="text" value="255, 255, 255" class="form-control f-data"
+                                       name="rectangle_color">
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="modal-footer px-2 pb-2">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SCAN Modal -->
+<div id="scan-modal" class="modal" tabindex="-1" aria-labelledby="scan-header"
+     style="display: none;" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-dark p-2">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal"><i
+                            class="fas fa-fw fa-close"></i>
+                    </button>
+                    <button type="submit" class="btn btn-outline-warning commit-btn" data-bs-dismiss="modal">
+                        <i class="fas fa-fw fa-search"></i>SCAN
+                    </button>
+                </div>
+                <h4 class="modal-title text-white" id="scan-header">SCAN</h4>
+            </div>
+            <div class="modal-body px-2 pt-2 pb-0">
+                <div class="mb-2">
+                    <label class="form-label">jar*</label>
+                    <input type="text" class="form-control f-data" name="jar"
+                           value="tsunami-main-0.0.10-SNAPSHOT-cli.jar">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">--ip-v4-target*</label>
+                    <input type="text" class="form-control f-data" name="ip_v4_target" aria-label="PATH OUT">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">-Dtsunami-config.location*</label>
+                    <input type="text" class="form-control f-data" name="location" value="tsunami.yaml">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">--scan-results-local-output-format*</label>
+                    <input type="text" class="form-control f-data" name="output_format" value="JSON">
+                </div>
+            </div>
+            <div class="modal-footer px-2 pb-2">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- VIEW-ONLY Modal -->
+<div id="view-only-modal" class="modal" tabindex="-1" aria-labelledby="view-only-header"
+     style="display: none;" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-dark p-2">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal"><i
+                            class="fas fa-fw fa-close"></i>
+                    </button>
+                </div>
+                <h4 class="modal-title text-white" id="view-only-header">VIEW-ONLY</h4>
+            </div>
+            <div class="modal-body px-2 pt-2 pb-0">
+                <div class="input-group mb-2">
+                    <span class="input-group-text">TARGET</span>
+                    <input type="text" class="form-control f-data" readonly name="target" aria-label="PATH OUT">
+                </div>
+                <div class="write-mdg-box mb-2" id="view-only-editor">
+                    <textarea name="text" style="display:none;"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer px-2 pb-2">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- RESTART Modal -->
+<div id="fh-restart-modal" class="modal" tabindex="-1" aria-labelledby="fh-restart-header"
+     style="display: none;" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-dark p-2">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal"><i
+                            class="fas fa-fw fa-close"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-warning commit-btn" data-bs-dismiss="modal">
+                        <i class="fa-solid fa-fw fa-retweet"></i>RESTART FH
+                    </button>
+                </div>
+                <h4 class="modal-title text-white" id="fh-restart-header">RESTART</h4>
+            </div>
+            <div class="modal-body px-2 pt-2 pb-0 m-2">
+                <div class="form-check form-switch">
+                    <input class="form-check-input f-data" type="checkbox" name="dsp" role="switch">
+                    <label class="form-check-label">DSP</label>
+                </div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input f-data" type="checkbox" name="know" role="switch">
+                    <label class="form-check-label">KNOW</label>
+                </div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input f-data" type="checkbox" name="history" role="switch">
+                    <label class="form-check-label">HISTORY</label>
+                </div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input f-data" type="checkbox" name="zoo" role="switch">
+                    <label class="form-check-label">ZOO</label>
+                </div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input f-data" type="checkbox" name="finansis" role="switch">
+                    <label class="form-check-label">FINANSIS</label>
+                </div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input f-data" type="checkbox" name="security" role="switch">
+                    <label class="form-check-label">SECURITY</label>
+                </div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input f-data" type="checkbox" name="en_decrypt" role="switch">
+                    <label class="form-check-label">EN-DECRYPT</label>
+                </div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input f-data" type="checkbox" name="timing" role="switch">
+                    <label class="form-check-label">TIMING</label>
+                </div>
+            </div>
+            <div class="modal-footer px-2 pb-2">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- TIMING Modal -->
+<div id="timing-modal" class="modal" tabindex="-1" aria-labelledby="timing-header" style="display: none;"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-dark p-2">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal"><i
+                            class="fas fa-fw fa-close"></i>
+                    </button>
+                    <button type="submit" class="btn btn-outline-warning commit-btn" data-bs-dismiss="modal"><i
+                            class="fas fa-fw fa-code-commit"></i>
+                    </button>
+                </div>
+                <h4 class="modal-title text-white" id="timing-header">TIMING</h4>
+            </div>
+            <div class="modal-body px-2 pt-2 pb-0">
+                <input type="text" hidden name="target" class="f-data">
+            </div>
+            <div class="modal-footer px-2 pb-2">
+            </div>
+        </div>
+    </div>
+</div>

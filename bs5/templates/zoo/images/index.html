@@ -1,0 +1,140 @@
+{% set title = '╭(′▽`)╭(′▽`)╯' %}
+
+{% extends "index.html" %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block ops %}
+    <button type="button" id="generate" class="btn" data-bs-toggle="tooltip"
+            data-bs-placement="bottom"
+            title="GENERATE"><i class="fas fa-fw fa-pager"></i>
+    </button>
+    <button type="button" id="operates" class="btn" data-bs-toggle="tooltip"
+            data-bs-placement="bottom"
+            title="OPERATES"><i class="fas fa-fw fa-exchange"></i>
+    </button>
+    <button type="button" id="render" class="btn" data-bs-toggle="tooltip"
+            data-bs-placement="bottom"
+            title="RENDER"><i class="fas fa-fw fa-home"></i>
+    </button>
+{% endblock %}
+{% block js %}
+    <script>
+        let target = $.url().param('target');
+
+        app_io = io.connect('http://' + document.domain + (location.port ? ":" + location.port : "") + '/zoo', {'sync disconnect on unload': true});
+        app_io.emit('join', {'at': 'progress'});
+        app_io.on('his', his);
+        app_io.on('progress', progress);
+
+        let Model = Object.create(ModelFH);
+        Model.$table = $table;
+        Model.target = target;
+        Model.signal = 'task';
+        Model.app = 'zoo:images';
+        Model.io = app_io;
+
+        Model.font = {
+            'u': '/webs/' + Model.app + '/index'
+        };
+        Model.index = {
+            'u': '/' + Model.app + '/index',
+            'f': function () {
+                list_for_table(this, Model, undefined);
+            }
+        };
+        Model.mkdir = {
+            'u': '/' + Model.app + '/mkdir',
+            'modal_id': 'mkdir-modal',
+            '$btn': $("#mkdir-modal .commit-btn"),
+            'f': function () {
+                commit_from_model(this, Model, true)
+            }
+        };
+        Model.deletes = {
+            'u': '/' + Model.app + '/delete',
+            '$btn': $("#delete"),
+            'f': function () {
+                confirm_do_with_table(this, Model, "DELETE");
+            }
+        };
+        Model.touch = {
+            'u': '/' + Model.app + '/touch',
+            'suffix': '.py',
+            'modal_id': 'touch-modal',
+            '$btn': $("#touch-modal .commit-btn"),
+            'f': function () {
+                commit_from_model(this, Model, true)
+            },
+        };
+        Model.edit = {
+            'u': '/' + Model.app + '/touch',
+            'modal_id': 'view-modal',
+            '$btn': $("#view-modal .commit-btn"),
+            'f': function () {
+                commit_from_model(this, Model, false)
+            },
+        };
+        Model.render = {
+            '$btn': $("#render"),
+            'action': 'images:render',
+            'f': function () {
+                confirm_do_ns(this, Model, "RENDER");
+            }
+        };
+        Model.generate_pages = {
+            '$btn': $("#generate"),
+            'action': 'images:generate_pages',
+            'f': function () {
+                confirm_do_ns(this, Model, "GENERATE-PAGES");
+            }
+        };
+        Model.operate = {
+            '$btn': $("#operates-modal .commit-btn"),
+            'action': 'images:operate',
+            'modal_id': 'operates-modal',
+            'f': function () {
+                emit_from_model(this, Model);
+            }
+        };
+        Model.operate.show = {
+            '$btn': $("#operates"),
+            'modal_id': 'operates-modal',
+            'f': function () {
+                show_modal_if_select_table(this, Model);
+            }
+        };
+
+        $images = $('.images')[0];
+        $video = $('.video')[0];
+        $rectangle = $('.rectangle')[0];
+
+        $("#operate").on('changed.bs.select', function (e, clickedIndex, isSelected, previousValue) {
+            console.log(clickedIndex);
+            if (clickedIndex === 0) {
+                $video.removeAttribute('hidden');
+                $images.setAttribute('hidden', 'hidden');
+                $rectangle.setAttribute('hidden', 'hidden');
+            } else if (clickedIndex === 1) {
+                $images.removeAttribute('hidden');
+                $video.setAttribute('hidden', 'hidden');
+                $rectangle.setAttribute('hidden', 'hidden');
+            } else {
+                $rectangle.removeAttribute('hidden');
+                $video.setAttribute('hidden', 'hidden');
+                $images.setAttribute('hidden', 'hidden');
+            }
+        });
+
+        $(document).ready(function () {
+            Model.index.f();
+            Model.mkdir.f();
+            Model.touch.f();
+            Model.deletes.f();
+            Model.edit.f();
+            Model.render.f();
+            Model.generate_pages.f();
+            Model.operate.f();
+            Model.operate.show.f();
+        })
+    </script>
+{% endblock %}

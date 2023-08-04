@@ -1,0 +1,54 @@
+{% set title = '〣( ºΔº )〣' %}
+
+{% extends "index.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block js %}
+    <script>
+        let target = $.url().param('target');
+        let Model = Object.create(ModelFH);
+
+        Model.$table = $table;
+        Model.target = target;
+        Model.font = {
+            'u': '/webs/template/index'
+        };
+        Model.index = {
+            'u': '/template/index',
+            'f': function () {
+                list_for_table(this, Model, undefined);
+            }
+        };
+        Model.touch = {
+            'u': '/template/touch',
+            'suffix': '.tim',
+            'modal_id': 'touch-modal',
+            '$btn': $("#touch-modal .commit-btn"),
+            'f': function () {
+                commit_from_model(this, Model, true)
+            },
+        };
+        Model.deletes = {
+            'u': '/template/delete',
+            '$btn': $("#delete"),
+            'f': function () {
+                confirm_do_with_table(this, Model, "DELETE");
+            }
+        };
+        Model.edit = {
+            'u': '/template/touch',
+            'modal_id': 'view-modal',
+            '$btn': $("#view-modal .commit-btn"),
+            'f': function () {
+                commit_from_model(this, Model, false)
+            },
+        };
+
+        $(document).ready(function () {
+            Model.index.f();
+            Model.touch.f();
+            Model.deletes.f();
+            Model.edit.f();
+        })
+    </script>
+{% endblock %}
+

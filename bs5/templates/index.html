@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html class="menuitem-active" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <title>o(#º▽º)=O))º0º)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="/static/fh/book-skull-solid.svg">
+    <link href="/static/bootstrap-5.1.3-dist/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+    <link href="/static/jquery-confirm-v3.3.4/dist/jquery-confirm.min.css" rel="stylesheet" type="text/css">
+    <link href="/static/jquery-ui-1.13.1/jquery-ui.min.css" rel="stylesheet" type="text/css">
+    <link href="/static/fontawesome-free-6.1.1-web/css/all.css" rel="stylesheet" type="text/css">
+    <link href="/static/bootstrap-table-1.20.2/dist/bootstrap-table.css" rel="stylesheet" type="text/css">
+    <link href="/static/bootstrap-table-1.20.2/dist/extensions/sticky-header/bootstrap-table-sticky-header.min.css"
+          rel="stylesheet" type="text/css">
+    <link href="/static/bootstrap-table-1.20.2/dist/extensions/page-jump-to/bootstrap-table-page-jump-to.min.css"
+          rel="stylesheet" type="text/css">
+    <link href="/static/bootstrap-select-1.13.14/css/bootstrap-select.min.css" rel="stylesheet" type="text/css">
+    <link href="/static/editor.md/css/editormd.min.css" rel="stylesheet" type="text/css">
+    <link href="/static/fh/app+.css" rel="stylesheet" type="text/css" id="app-style">
+
+    <script src="/static/jquery/jquery-3.6.0.min.js"></script>
+    <script src="/static/jquery-confirm-v3.3.4/dist/jquery-confirm.min.js"></script>
+    <script src="/static/jquery-ui-1.13.1/jquery-ui.min.js"></script>
+    <script src="/static/bootstrap-5.1.3-dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/purl-v2.3.1/purl.js"></script>
+    <script src="/static/bootstrap-table-1.20.2/dist/bootstrap-table.min.js"></script>
+    <script src="/static/bootstrap-table-1.20.2/dist/bootstrap-table-locale-all.min.js"></script>
+    <script src="/static/bootstrap-table-1.20.2/dist/extensions/page-jump-to/bootstrap-table-page-jump-to.min.js"></script>
+    <script src="/static/bootstrap-table-1.20.2/dist/extensions/sticky-header/bootstrap-table-sticky-header.min.js"></script>
+    <script src="/static/fontawesome-free-6.1.1-web/js/all.js"></script>
+    <script src="/static/bootstrap-select-1.14.0-beta3/js/bootstrap-select.js"></script>
+    <script src="/static/axios-0.27.2/dist/axios.min.js"></script>
+    <script src="/static/purl-v2.3.1/purl.js"></script>
+    <script src="/static/socket.io-client-4.5.0/dist/socket.io.min.js"></script>
+    <script src="/static/editor.md/src/editormd.js"></script>
+    <script src="/static/fh/business+.js"></script>
+</head>
+<body>
+
+<script>
+    function progress(data) {
+        let at = escape(data.at);
+        let btns = data.btns;
+        let status = data.status;
+        if (status === 'EXECUTE') {
+            $('.pause').attr('disabled', false);
+            $('.stop').attr('disabled', false);
+            $('.execute').attr('disabled', true);
+        } else if (status === 'PAUSE') {
+            $('.pause').attr('disabled', false);
+            $('.stop').attr('disabled', false);
+            $('.execute').attr('disabled', true);
+        } else if (status === 'STOP') {
+            $('.pause').attr('disabled', false);
+            $('.stop').attr('disabled', false);
+            $('.execute').attr('disabled', false);
+        }
+    }
+
+    function his(data) {
+        $('#his pre').append(data);
+    }
+
+</script>
+<div class="menu-top sticky-top">
+    <div id="menu" class="row bg-dark m-0 pb-1 pt-1">
+        <div class="col-lg-7 p-0">
+            <div class="btn-group">
+                <button class="btn btn-outline-info rtk-btn{% if edp == 'home' %} active{% endif %}" name="/webs/home"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="bottom" title="HOME">
+                    <i class="fas fa-fw fa-home"></i></button>
+                {% if 'dsp' in _bps %}
+                    <button class="btn btn-outline-info rtk-btn{% if edp == 'yfd' %} active{% endif %}"
+                            name="/webs/dsp:yfd/index"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="bottom" title="YFD">
+                        <i class="fa-brands fa-fw fa-docker"></i></button>
+                    <button class="btn btn-outline-info rtk-btn{% if edp == 'yft' %} active{% endif %}"
+                            name="/webs/dsp:yft/index"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="bottom" title="YFT">
+                        <i class="fa-solid fa-fw fa-flask-vial"></i></button>
+                {% endif %}
+                {% if 'finansis' in _bps %}
+                    <button class="btn btn-outline-info rtk-btn{% if edp == 'py' %} active{% endif %}"
+                            name="/webs/finansis:py/index" data-bs-toggle="tooltip"
+                            data-bs-placement="bottom" title="PY">
+                        <i class="fa-brands fa-fw fa-python"></i></button>
+                    <button class="btn btn-outline-info rtk-btn{% if edp == 'df' %} active{% endif %}"
+                            name="/webs/finansis:df/index" data-bs-toggle="tooltip"
+                            data-bs-placement="bottom" title="DF">
+                        <i class="fas fa-fw fa-table"></i></button>
+                {% endif %}
+                {% if 'history' in _bps %}
+                    <button class="btn btn-outline-info rtk-btn{% if edp == 'history' %} active{% endif %}"
+                            name="/webs/history/index" data-bs-toggle="tooltip"
+                            data-bs-placement="bottom" title="HIS">
+                        <i class="fa-solid fa-fw fa-print"></i></button>
+                {% endif %}
+                {% if 'know' in _bps %}
+                    <button class="btn btn-outline-info rtk-btn{% if edp == 'doc' %} active{% endif %}"
+                            name="/webs/know:doc/index"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="bottom" title="DOC">
+                        <i class="fas fa-fw fa-book"></i></button>
+                    <button class="btn btn-outline-info rtk-btn{% if edp == 'site' %} active{% endif %}"
+                            name="/webs/know:site/index" data-bs-toggle="tooltip"
+                            data-bs-placement="bottom" title="SIT">
+                        <i class="fas fa-fw fa-sitemap"></i></button>
+                {% endif %}
+                {% if 'star' in _bps %}
+                    <button class="btn btn-outline-info rtk-btn{% if edp == 'star' %} active{% endif %}"
+                            name="/webs/star/index"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="bottom" title="STA">
+                        <i class="fa-solid fa-fw fa-heart"></i></button>
+                {% endif %}
+                {% if 'en_decrypt' in _bps %}
+                    <button class="btn btn-outline-info rtk-btn{% if edp == 'en_decrypt' %} active{% endif %}"
+                            name="/webs/en_decrypt/index" data-bs-toggle="tooltip"
+                            data-bs-placement="bottom" title="DEC">
+                        <i class="fa-solid fa-fw fa-shield-halved"></i></button>
+                {% endif %}
+                {% if 'timing' in _bps %}
+                    <button class="btn btn-outline-info rtk-btn{% if edp == 'timing' %} active{% endif %}"
+                            name="/webs/timing/index"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="bottom" title="TIM">
+                        <i class="fa-solid fa-fw fa-clock"></i></button>
+                {% endif %}
+                {% if 'security' in _bps %}
+                    <button class="btn btn-outline-info rtk-btn{% if edp == 'tsunami' %} active{% endif %}"
+                            name="/webs/security:tsunami/index" data-bs-toggle="tooltip"
+                            data-bs-placement="bottom" title="TSU">
+                        <i class="fas fa-fw fa-water"></i></button>
+                    <button disabled class="btn btn-outline-info rtk-btn" name="/webs/security:snort/index"
+                            data-bs-toggle="tooltip" data-bs-placement="bottom" title="SNO">
+                        <i class="fas fa-fw fa-piggy-bank"></i></button>
+                {% endif %}
+                {% if 'zoo' in _bps %}
+                    <button class="btn btn-outline-info rtk-btn{% if edp == 'images' %} active{% endif %}"
+                            name="/webs/zoo:images/index" data-bs-toggle="tooltip"
+                            data-bs-placement="bottom" title="IMG">
+                        <i class="fas fa-fw fa-images"></i></button>
+                    <a class="btn btn-outline-info" target="_blank"
+                       href="https://zooatmospheregroup.github.io/Zoo-HZ-Media-Volunteers/" data-bs-toggle="tooltip"
+                       data-bs-placement="bottom" title="VOL">
+                        <i class="fas fa-fw fa-people-group"></i></a>
+                {% endif %}
+
+            </div>
+        </div>
+        <div class="col-lg-3 pb-0 pt-0">
+            <select id="star-select" data-style="btn-light"
+                    data-title="STAR"
+                    data-live-search="true"
+                    class="selectpicker form-control">
+            </select>
+        </div>
+        <div class="col-lg-2 p-0">
+            <div class="input-group">
+                <input name="search" id="top-search" type="text" class="form-control" value=""
+                       placeholder="a | d | f | s | ns | ctx"
+                       aria-describedby="search">
+                <button id="search" class="btn btn-outline-success" type="button" data-bs-toggle="tooltip"
+                        data-bs-placement="bottom" title="SEARCH"><i
+                        class="fas fa-fw fa-search"></i></button>
+            </div>
+        </div>
+    </div>
+    <div class="row bg-info m-0">
+        <div class="col-12 p-0">
+            <div class="p-1 float-start">
+                <div id="parents" class="mb-1 mt-0 ml-2"></div>
+            </div>
+            <div class="p-0 float-end">
+                {% block btns %}
+                    <div class="btn-group">
+                        <button id="max" class="btn btn-view-file" data-bs-toggle="tooltip"
+                                data-bs-placement="left"
+                                title="MAX">
+                            <i class="fa-solid fa-fw fa-window-maximize"></i></button>
+                        <button type="button" id="mkdir" class="btn" data-bs-toggle="modal"
+                                data-bs-placement="bottom" title="MKDIR"
+                                data-bs-target="#mkdir-modal"><i class="fas fa-fw fa-folder"></i>
+                        </button>
+                        <button type="button" id="touch" class="btn" data-bs-toggle="modal"
+                                data-bs-placement="bottom" title="TOUCH"
+                                data-bs-target="#touch-modal"><i class="fas fa-fw fa-add"></i>
+                        </button>
+                        <button disabled type="button" id="delete" class="btn check-files"
+                                data-bs-toggle="tooltip"
+                                data-bs-placement="bottom" title="DELETE"><i class="fas fa-fw fa-trash"></i>
+                        </button>
+                        {% block ops %}
+                        {% endblock %}
+
+                    </div>
+                {% endblock %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block content %}
+<div class="row m-0">
+    <div class="col-lg-2 p-0" id="div_tb">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover table-bordered table-condensed table-no-bordered table-centered table-nowrap m-0"
+                   id="table"
+                   data-toggle="table"
+                   data-locale="en-US"
+                   data-sticky-header="true"
+                   data-show-jumpto="true"
+                   data-icon-size="sm"
+                   data-page-size="20"
+                   data-side-pagination="server"
+                   data-click-to-select="false"
+                   data-pagination="true"
+                   data-falign="center"
+                   data-search="true"
+                    {#                               data-detail-view="true"#}
+                    {#                               data-detail-formatter="detailFormatter"#}
+                   data-id-field="id"
+                   data-sort-name="id"
+                   data-sort-order="desc"
+                   data-pagination-h-align="left"
+                   data-pagination-detail-h-align="left"
+                   data-unique-id="id"
+                   data-page-list="[20]">
+                <thead class="table-light">
+                <tr>
+{#                    <th data-align="center" data-width="30px" data-formatter="iFormatter">N</th>#}
+                    <th data-align="center" data-field="state" data-width="30px" data-checkbox="true"></th>
+                    <th data-align="left" data-field="afp" data-visible="false">AFP</th>
+                    <th data-align="left" data-field="app" data-visible="false">APP</th>
+                    <th data-align="right" data-field="ctime" data-visible="false">CTIME</th>
+                    <th data-align="right" data-field="mtime" data-visible="false">MTIME</th>
+                    <th data-align="right" data-field="size" data-visible="false">SIZE</th>
+                    <th data-align="left" data-field="fn" data-formatter="fileViewFormatter">FILE</th>
+                    <th data-align="left" data-formatter="operateFormatter" data-width="30px">OPS</th>
+                </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="col-lg-10 p-0" id="div_vw">
+        <div id="viewer_md">
+            {% block view %}
+            {% endblock %}
+        </div>
+    </div>
+</div>
+{% include 'modal.html' %}
+{% endblock %}
+
+<div id="bk_md" class="modal" tabindex="-1" aria-labelledby="bk_hd"
+     style="display: none;" aria-hidden="true">
+    <div class="modal-dialog modal-me modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-dark p-2">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal"><i
+                            class="fas fa-fw fa-close"></i>
+                    </button>
+                    <button type="button" id="bookmark" class="btn btn-outline-light" data-bs-dismiss="modal"><i
+                            class="fas fa-fw fa-bookmark"></i>
+                    </button>
+                </div>
+                <h4 class="modal-title text-white" id="view-header">BOOKMARKS</h4>
+            </div>
+            <div class="modal-body">
+                <select id="bookmarks"
+                        data-style="btn-light"
+                        data-title="BOOKMARKS"
+                        data-live-search="true" multiple
+                        class="selectpicker form-control">
+                </select>
+            </div>
+            <div class="modal-footer px-2 pb-2">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container-fluid">
+    <div class="offcanvas offcanvas-end" data-bs-scroll="true" tabindex="-1" id="his"
+         aria-labelledby="HISTORY"
+         style="z-index:1055">
+        <div class="offcanvas-header bg-light p-1">
+            <div class="btn-group">
+                <button class="btn" data-bs-dismiss="offcanvas" aria-label="Close">
+                    <i class="fa-solid fa-fw fa-close"></i></button>
+                <button id="exe" class="btn execute"><i class="fas fa-fw fa-play"></i></button>
+                <button id="exe_ctx" class="btn execute"><i
+                        class="fas fa-fw fa-arrow-up-short-wide"></i>
+                </button>
+                <button class="btn pause"><i class="fas fa-fw fa-pause"></i></button>
+                <button class="btn stop"><i class="fas fa-fw fa-stop"></i></button>
+                <button class="btn clean"><i class="fa-solid fa-fw fa-recycle"></i></button>
+                <button class="btn max"><i class="fa-solid fa-fw fa-maximize"></i></button>
+                <button class="btn med"><i class="fa-solid fa-fw fa-square"></i></button>
+                <button class="btn min"><i class="fa-solid fa-fw fa-minimize"></i></button>
+            </div>
+            <h5 class="offcanvas-title" id="HISTORY">HISTORY</h5>
+        </div>
+        <div class="offcanvas-body p-2">
+            <pre class="form-control"></pre>
+        </div>
+    </div>
+</div>
+<div id="spatiotemporal_modal" class="modal" tabindex="-1" aria-labelledby="spatiotemporal-header"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-dark p-2">
+                <div class="btn-group">
+                    <button class="btn btn-outline-light" data-bs-dismiss="modal"><i
+                            class="fas fa-fw fa-close"></i>
+                    </button>
+                </div>
+                <h4 class="modal-title text-white" id="view-header">SPATIOTEMPORAL</h4>
+            </div>
+            <div class="modal-body px-2 pt-2 pb-0">
+                <div class="table-responsive">
+                    <table class="spatio table table-striped table-hover table-bordered table-condensed table-no-bordered table-centered table-nowrap mb-0"
+                           id="spatio"
+                           data-toggle="table"
+                           data-locale="en-US"
+                           data-sticky-header="true"
+                           data-show-jumpto="true"
+                           data-icon-size="sm"
+                           data-page-size="20"
+                           data-side-pagination="client"
+                           data-click-to-select="false"
+                           data-pagination="true"
+                           data-falign="center"
+                           data-search="false"
+                           data-id-field="id"
+                           data-sort-name="id"
+                           data-sort-order="desc"
+                           data-pagination-h-align="left"
+                           data-pagination-detail-h-align="right"
+                           data-unique-id="id">
+                        <thead class="table-light">
+                        <tr>
+                            <th data-align="center" data-width="52px" data-formatter="iSpatio">NUM</th>
+                            <th data-align="center" data-formatter="operatesSpatio" data-width="100px">OPERATION</th>
+                            <th data-align="left" data-field="id" data-visible="false">ID</th>
+                            <th data-align="left" data-field="spa">SPA</th>
+                            <th data-align="right" data-field="size">SIZE</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer px-2 pb-2">
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    let $menu = $("#menu");
+    let $table = $("#table");
+    let tk = $.url().param('tk');
+    let $bookmark = $("#bookmark");
+    let $bookmarks = $("#bookmarks");
+    let $bookmarks_modal = new bootstrap.Modal(document.getElementById('bk_md'), {keyboard: false});
+    let $star = $("#star-select");
+    let $bd = $("body");
+    let $spatio = $("#spatio");
+    let $div_tb = $('#div_tb');
+    let $div_vw = $('#div_vw');
+    let ins_vw;
+    let app;
+    let afp;
+    let edp;
+    let at;
+    let app_io;
+    {#let aep;#}
+
+    $bd.on('click', '.rtk-btn', function () {
+        if (tk === undefined || tk === 'undefined') {
+            window.location.assign(this.name)
+        } else {
+            window.location.assign(this.name + '?tk=' + tk)
+        }
+    });
+
+    $(document).ready(function () {
+        let tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        let tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+
+        // {#$(".modal").draggable();#}
+        let $his = $('#his');
+
+        $his.on('click', '.clean', function () {
+            $('#his pre').empty();
+        });
+        $his.on('click', '.med', function () {
+            $his.css("width", '50%');
+        });
+        $his.on('click', '.max', function () {
+            $his.css("width", '100%');
+        });
+        $his.on('click', '.min', function () {
+            $his.css("width", '30%');
+        });
+
+        {# favorite #}
+        $bd.on('click', '.star_favorite', function () {
+            let that = this;
+            get({
+                'url': '/star/favorite',
+                'data': {'bookmark': 'DEFAULT', 'target': that.name},
+                'success': function (rsp) {
+                    $(that).addClass('star_remove');
+                    $(that).removeClass('star_favorite');
+                    $(that).addClass('btn-outline-danger');
+                    $(that).removeClass('btn-outline-info');
+                }
+            });
+        });
+        $bd.on('click', '.star_remove', function () {
+            let that = this;
+            get({
+                'url': '/star/unlike',
+                'data': {'target': that.name},
+                'success': function (rsp) {
+                    $(that).addClass('star_favorite');
+                    $(that).removeClass('star_remove');
+                    $(that).addClass('btn-outline-info');
+                    $(that).removeClass('btn-outline-danger');
+                }
+            })
+        });
+
+        {# stars #}
+        get({
+            'url': '/star/stars',
+            'data': {},
+            'btn': $(this),
+            'success': function (rsp) {
+                let rows = rsp.data.rows;
+                $star.empty();
+                for (let i in rows.STARS) {
+                    $star.append('<option class="view-file star" value="' + i + '">' + i + '</option>');
+                }
+                $star.selectpicker('refresh');
+                $star.val(app + ',' + target);
+            }
+        });
+
+        {# visit #}
+        $bd.on('click', '.visit-btn', function () {
+            console.log(this.name);
+            get({
+                'url': '/know:site/visit',
+                'data': {'target': this.name},
+                'btn': $(this),
+                'success': function (rsp) {
+                    let rows = rsp.data.rows;
+                    for (let i = 0; i < rows.length; i++) {
+                        window.open(rows[i]);
+                        console.info(rows[i]);
+                    }
+                }
+            });
+        });
+
+        $bd.on('click', '.his', function () {
+            let target = this.name;
+            console.log('view:' + model.u);
+            console.log('target:' + target);
+
+            get({
+                'url': model.u,
+                'data': {'target': target},
+                'btn': $(this),
+                'success': function (rsp) {
+                    if (rsp.data.status === false) {
+                        return
+                    }
+                    $(`#${model.modal_id}`).show();
+                    let $textarea = $(`#${model.modal_id} textarea`);
+                    let $input = $(`#${model.modal_id} input`);
+                    {#$textarea.hide();#}
+
+                    let rows = rsp.data.rows;
+                    if (model.editor !== undefined) {
+                        editormd(model.editor, {
+                            width: "100%",
+                            height: "825px",
+                            watch: false,
+                            theme: "dark",
+                            mode: "python",
+                            toolbar: false,
+                            value: rows,
+                            searchReplace: true,
+                            codeFold: true,
+                            syncScrolling: "single",
+                            path: "/static/editor.md/lib/"
+                        });
+                    } else {
+                        $textarea.val(rows);
+                        $textarea.show();
+                    }
+                    $input.val(target);
+                }
+            });
+        });
+
+        {# view callback #}
+
+        function cb_view(rsp) {
+            let $vw = $("#viewer_md");
+            $vw.empty();
+            $vw.append('<div id="viewer"><textarea style="display:none;" class="form-control f-data" name="text" spellcheck="false" tabindex="0" wrap="off"></textarea></div>');
+            $vw.append('<img id="im" class="img-fluid" src="">');
+            $vw.append('<table class="table table-striped mb-0" data-search="false" id="dddd"><thead class="table-light"></thead><tbody></tbody></table>');
+
+            let parents = rsp.data.parents;
+            let $parents = $("#parents");
+            $parents.empty();
+            $parents.append("<strong>#: </strong>");
+
+            let ps = [];
+            let u = '/webs/' + rsp.data.app;
+
+            for (let i = 0; i < parents.length - 1; i++) {
+                ps.push("<a href='" + u + "/index?target=" + parents[i]['i_path'] + '&tk=' + tk + "'><strong>" + parents[i]['i'] + "</strong></a>");
+            }
+            ps.push("<strong>" + parents[parents.length - 1]['i'] + "</strong>");
+            $parents.append(ps.join(' / '));
+
+            if (rsp.data.type === 'img') {
+                let $img = $('#im');
+                $img.attr("src", rsp.data.rows);
+                $img.show();
+            } else if (rsp.data.type === 'txt') {
+                ins_vw = editormd('viewer', {
+                    width: "100%",
+                    height: $(document).height() - $div_tb.offset().top - 25,
+                    {#autoHeight: true,#}
+                    watch            : false,
+                    toolbar          : false,
+                    codeFold         : true,
+                    searchReplace    : true,
+                    value: rsp.data.rows,
+                    theme: 'default',
+                    mode: 'python',
+                    path: "/static/editor.md/lib/",
+
+                });
+            } else if (rsp.data.type === 'xls') {
+                let $ddd = $('#dddd');
+                $ddd.bootstrapTable('destroy');
+                $ddd.bootstrapTable({
+                    columns: rsp.data.columns,
+                    data: rsp.data.rows,
+                    cache: false,
+                    striped: true,
+                    sidePagination: "client",
+                    sortOrder: "desc",
+                    pageSize: 20,
+                    width: 667,
+                    locale: "en-US",
+                    pageList: "[20]",
+                    pagination: true,
+                });
+                $ddd.show();
+            }
+        }
+
+        {# view #}
+        $bd.on('click', '.view-file', function () {
+            if (this.name === "") {
+                at = this.text;
+            } else {
+                at = this.name;
+            }
+            app = at.split(',')[0];
+            afp = at.split(',')[1];
+            if (app.split(':').length === 2) {
+                edp = app.split(':')[1];
+            } else {
+                edp = app;
+            }
+
+            let uri = '/' + app + '/view?target=' + afp + '&tk=' + tk;
+
+            $('.btn-view-file').each(function () {
+                    this.removeAttribute('hidden');
+                }
+            );
+
+            let $img = $('img');
+            {#let $textarea = $('textarea');#}
+            {#$textarea.hide();#}
+            $img.hide();
+            let that = this;
+
+            get({
+                'url': uri,
+                'data': {},
+                'btn': $(this),
+                'success': function (rsp) {
+                    cb_view(rsp);
+                    {# reget folder#}
+                    if ($(that).hasClass('star')) {
+                        get({
+                            'url': '/' + app + '/index',
+                            'data': {'target': rsp.data.parent},
+                            'success': function (rspp) {
+                                $table.bootstrapTable('load', rspp.data);
+                            }
+                        })
+                    }
+                }
+            });
+
+            {#let tmp = app.split(':');#}
+            {#if (tmp.length === 2) {#}
+            {#    aep = '/' + tmp[0] + ':' + tmp[1];#}
+            {# } else {#}
+            {#    aep = '/' + tmp[0];#}
+            {# }#}
+
+            if (app_io !== undefined) {
+                app_io.close();
+            }
+            app_io = io.connect('http://' + document.domain + (location.port ? ":" + location.port : "") + '/' + app.split(':')[0], {'sync disconnect on unload': true});
+            app_io.emit('join', {'at': at});
+            app_io.on('his', his);
+            app_io.on('progress', progress);
+        });
+
+        {# edit #}
+        $bd.on('click', '#commit', function () {
+            let params = Model.json('viewer_md');
+            let uri = '/' + app + '/touch';
+            params.target = afp;
+            console.info('params', params);
+            get({
+                'url': uri,
+                'data': params,
+                'btn': $("#commit"),
+                'success': function (rsp) {
+                }
+            });
+        });
+
+        {# max #}
+        $bd.on('click', '#max', function () {
+            if ($div_vw.hasClass('col-lg-9')) {
+                $menu[0].setAttribute('hidden', 'hidden');
+                $div_tb[0].setAttribute('hidden', 'hidden');
+                $div_vw.removeClass('col-lg-9');
+                $div_vw.addClass('col-lg-12');
+
+            } else {
+                $menu[0].removeAttribute('hidden');
+                $div_tb[0].removeAttribute('hidden');
+                $div_vw.removeClass('col-lg-12');
+                $div_vw.addClass('col-lg-9');
+            }
+            ins_vw.resize(null, '805px');
+        });
+
+        {# execute #}
+        $bd.on('click', '.execute', function () {
+            console.log(this.id);
+            let params = {
+                'at': at,
+                'action': app + ':' + 'execute',
+                'is_parallel': false,
+                'params': {'target': at}
+            };
+            if (this.id === 'execute_ctx' || this.id === 'exe_ctx') {
+                let params_ctx = Model.json('viewer_md');
+                params.params = {'target': at, 'ctx': params_ctx.text}
+            }
+            $('#his pre').empty();
+            $('.execute').attr('disabled', true);
+            app_io.emit('task', params);
+        });
+
+        {# stop #}
+        $bd.on('click', '.stop', function () {
+            console.log(this.id);
+            let params = {
+                'at': at,
+                'action': app + ':' + 'stop',
+                'echo': false,
+                'params': {'target': at}
+            };
+            $('.stop').attr('disabled', true);
+            app_io.emit('task', params);
+        });
+
+        {# pause #}
+        $bd.on('click', '.pause', function () {
+            console.log(this.id);
+            let params = {
+                'at': at,
+                'action': app + ':' + 'pause',
+                'echo': false,
+                'params': {'target': at}
+            };
+            app_io.emit('task', params);
+        });
+
+        {# spatiotemporal #}
+        $bd.on('click', '.spatiotemporal', function () {
+            $("#spatiotemporal_modal").modal('show');
+            $spatio.bootstrapTable('refreshOptions', {
+                url: '/spatiotemporal/visit?app=' + app + '&target=' + afp + '&tk=' + tk
+            });
+        });
+
+        {# download #}
+        $bd.on('click', '.download', function () {
+            let url = '/' + app + '/download?target=' + afp + '&tk=' + tk;
+            window.open(url);
+            console.info(url);
+        });
+
+        {# check uncheck #}
+        $table.on('check.bs.table', function (e, row, $element) {
+            $('.check-files').each(function () {
+                    this.removeAttribute('disabled');
+                }
+            );
+        });
+        $table.on('uncheck.bs.table', function (e, row, $element) {
+            let select = get_selected($table, false);
+            if (!select.ids) {
+                $('.check-files').each(function () {
+                        this.setAttribute('disabled', 'disabled');
+                    }
+                );
+            }
+        });
+    });
+</script>
+{% block js %}
+{% endblock %}
+</body>
+</html>

@@ -1,0 +1,94 @@
+{% set title = '〣( ºΔº )〣' %}
+
+{% extends "index.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block ops %}
+    <button disabled id="on" class="btn check-files" data-bs-toggle="tooltip"
+            data-bs-placement="bottom"
+            title="ON"><i class="fa-solid fa-fw fa-toggle-on"></i>
+    </button>
+    <button disabled id="off" class="btn check-files" data-bs-toggle="tooltip"
+            data-bs-placement="bottom"
+            title="OFF"><i
+            class="fa-solid fa-fw fa-toggle-off"></i>
+    </button>
+    <button disabled id="execute_now" class="btn check-files" data-bs-toggle="tooltip"
+            data-bs-placement="bottom"
+            title="EXECUTE NOW"><i class="fas fa-fw fa-play"></i>
+    </button>
+{% endblock %}
+{% block js %}
+    <script>
+        let target = $.url().param('target');
+        let Model = Object.create(ModelFH);
+
+        Model.$table = $table;
+        Model.target = target;
+        Model.app = 'timing';
+        Model.font = {
+            'u': '/webs/' + Model.app + '/index'
+        };
+        Model.ldr = {
+            'u': '/' + Model.app + '/index',
+            'f': function () {
+                list_for_table(this, Model, undefined);
+            }
+        };
+
+        Model.touch = {
+            'u': '/' + Model.app + '/update',
+            'suffix': '.tim',
+            'modal_id': 'touch-modal',
+            '$btn': $("#touch-modal .commit-btn"),
+            'f': function () {
+                commit_from_model(this, Model, true)
+            },
+        };
+        Model.deletes = {
+            'u': '/' + Model.app + '/delete',
+            '$btn': $("#delete"),
+            'f': function () {
+                confirm_do_with_table(this, Model, "DELETE");
+            }
+        };
+        Model.on = {
+            'u': '/' + Model.app + '/on',
+            '$btn': $("#on"),
+            'f': function () {
+                confirm_do_with_table(this, Model, "TIMING ON");
+            }
+        };
+        Model.off = {
+            'u': '/' + Model.app + '/off',
+            '$btn': $("#off"),
+            'f': function () {
+                confirm_do_with_table(this, Model, "TIMING OFF");
+            }
+        };
+        Model.execute = {
+            'u': '/' + Model.app + '/execute',
+            '$btn': $("#execute_now"),
+            'f': function () {
+                confirm_do_with_table(this, Model, "EXECUTE NOW");
+            }
+        };
+        Model.edit = {
+            'u': '/' + Model.app + '/update',
+            'modal_id': 'view-modal',
+            '$btn': $("#view-modal .commit-btn"),
+            'f': function () {
+                commit_from_model(this, Model, false)
+            },
+        };
+        $(document).ready(function () {
+            Model.ldr.f();
+            Model.touch.f();
+            Model.deletes.f();
+            Model.on.f();
+            Model.off.f();
+            Model.execute.f();
+            Model.edit.f();
+        })
+    </script>
+{% endblock %}
+

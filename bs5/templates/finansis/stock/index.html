@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+{% set title = 'stock' %}
+
+{% extends "index.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block ops %}
+    <div class="btn-group mr-2">
+        <button type="button" id="transfer-stocks-btn" class="btn btn-sm btn-outline-secondary">Transfer
+        </button>
+        <button type="button" id="hist-stocks-btn" class="btn btn-sm btn-outline-secondary">Hist</button>
+        <button type="button" name="edit-stocks-btn" class="btn btn-sm btn-outline-secondary">Edit</button>
+        <button type="button" id="delete-stocks-btn" class="btn btn-sm btn-outline-danger">Delete</button>
+        <button type="button" id="update-stocks-btn" class="btn btn-sm btn-outline-secondary">Update
+        </button>
+        <button type="button" id="exclude-stocks-btn" class="btn btn-sm btn-outline-secondary">Exclude
+        </button>
+    </div>
+{% endblock %}
+{% block js %}
+    <script>
+        let stocks_main = $("#stocks-main");
+        let $table = $('#stocks-table');
+
+        function detailFormatter(index, row) {
+            let container = $("#temp-container");
+            let v_id = "container" + row.id;
+            let k_type = 'hist_5m';
+
+            container.append('<div id="' + v_id + '"></div><div id="slider' + k_type + '"></div>');
+            let v_container = $("#" + v_id);
+            v_container.empty();
+
+            function success(response, p) {
+                let container = p.container;
+                let k_type = p.k_type;
+                let data = response.data[k_type];
+
+                console.log(data);
+                k_(data, container);
+            }
+
+            let params = {
+                'url': '/k/' + row.id,
+                'data': {},
+                'success': success,
+                'success_params': {
+                    'container': v_id,
+                    'k_type': k_type
+                }
+            };
+            get(params);
+
+            let detail = '<div></div>';
+            let tmp = $(detail);
+
+            tmp.append(v_container);
+
+            return tmp
+        }
+
+        $(document).ready(function () {
+            $table.bootstrapTable('refreshOptions', {
+                ajax: function (request) {
+                    axios.request({url: '/finansis/stock/index', method: 'get', params: request.data})
+                        .then(function (response) {
+                            request.success({
+                                row: response.data
+                            });
+                            console.log(response.data);
+                            $table.bootstrapTable('load', response.data);
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        });
+                },
+            });
+            search_move($table);
+            $(window).resize(function () {
+                adjust_height($table);
+            });
+        });
+
+
+        $("#delete-stocks-btn").confirm({
+            closeIcon: true,
+            theme: 'supervan',
+            title: "删除用户",
+            content: "确定删除已选用户?",
+            buttons: {
+                deleteKey: {
+                    text: '删除',
+                    action: function () {
+                        let form_id = 'stocks-delete-form';
+                        let action = '/stocks/delete';
+                        let callback_ = function (data, params) {
+                            $('#stocks-table').bootstrapTable('refresh');
+                        };
+                        post_ivs_in_form('stocks-table', form_id, action, callback_);
+
+                    }
+                },
+                cancel: {text: '取消'}
+            }
+        });
+
+
+        $("#update-stocks-btn").confirm({
+            closeIcon: true,
+            theme: 'supervan',
+            title: "update stocks",
+            content: "Are you sure update all stocks?",
+            buttons: {
+                deleteKey: {
+                    text: 'update',
+                    action: function () {
+                        axios.request({url: '/finansis/stock/update', method: 'get', params: request.data})
+                            .then(function (response) {
+                                if (response.data.status) {
+                                    $('#stocks-table').bootstrapTable('refresh');
+                                }
+                                console.log(response.data);
+                            })
+                            .catch(function (error) {
+                                console.log(error);
+                                catch_error(error);
+                            });
+                    }
+                },
+                cancel: {text: '取消'}
+            }
+        });
+
+
+        $("#transfer-stocks-btn").confirm({
+            closeIcon: true,
+            theme: 'supervan',
+            title: "transfer stocks",
+            content: "Are you sure transfer all stocks?",
+            buttons: {
+                transferKey: {
+                    text: 'transfer',
+                    action: function () {
+                        axios.request({url: '/finansis/transfer', method: 'get', params: request.data})
+                            .then(function (response) {
+                                if (response.data.status) {
+                                    alert('Ok')
+                                }
+                                console.log(response.data);
+                            })
+                            .catch(function (error) {
+                                console.log(error);
+                                catch_error(error);
+                            });
+                    }
+                },
+                cancel: {text: '取消'}
+            }
+        });
+
+
+        $("#exclude-stocks-btn").confirm({
+            closeIcon: true,
+            theme: 'supervan',
+            title: "exclude stocks",
+            content: "Are you sure excluding stocks selected?",
+            buttons: {
+                deleteKey: {
+                    text: 'exclude',
+                    action: function () {
+                        let form_id = 'stocks-delete-form';
+                        let action = '/stocks/exclude';
+                        let callback_ = function (data, params) {
+                            $('#stocks-table').bootstrapTable('refresh');
+                        };
+                        post_ivs_in_form('stocks-table', form_id, action, callback_);
+                    }
+                },
+                cancel: {text: '取消'}
+            }
+        });
+
+
+        $("#hist-stocks-btn").confirm({
+            closeIcon: true,
+            theme: 'supervan',
+            title: "hist stocks",
+            content: "Are you sure hist stocks selected?",
+            buttons: {
+                deleteKey: {
+                    text: 'hist',
+                    action: function () {
+                        let form_id = 'stocks-delete-form';
+                        let action = '/stocks/hist';
+                        let callback_ = function (data, params) {
+                            $('#stocks-table').bootstrapTable('refresh');
+                        };
+                        post_ivs_in_form('stocks-table', form_id, action, callback_);
+                    }
+                },
+                cancel: {text: '取消'}
+            }
+        });
+    </script>
+{% endblock %}

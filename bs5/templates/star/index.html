@@ -1,0 +1,49 @@
+{% set title = '〣( ºΔº )〣' %}
+
+{% extends "index.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block ops %}
+    <a type="button" class="btn" target="_blank" href="/star/stars" data-bs-toggle="tooltip"
+       data-bs-placement="bottom" title="STAR"><i class="fas fa-fw fa-star"></i>
+    </a>
+{% endblock %}
+{% block js %}
+    <script>
+        let target = $.url().param('target');
+        let Model = Object.create(ModelFH);
+
+        Model.$table = $table;
+        Model.target = target;
+        Model.app = 'star';
+        Model.font = {
+            'u': '/webs/' + Model.app + '/index'
+        };
+        Model.index = {
+            'u': '/' + Model.app + '/index',
+            'f': function () {
+                list_for_table(this, Model, undefined);
+            }
+        };
+        Model.mkdir = {
+            'u': '/' + Model.app + '/mkdir',
+            'modal_id': 'mkdir-modal',
+            '$btn': $("#mkdir-modal .commit-btn"),
+            'f': function () {
+                commit_from_model(this, Model, true)
+            }
+        };
+        Model.deletes = {
+            'u': '/' + Model.app + '/delete',
+            '$btn': $("#delete"),
+            'f': function () {
+                confirm_do_with_table(this, Model, "DELETE");
+            }
+        };
+
+        $(document).ready(function () {
+            Model.index.f();
+            Model.deletes.f();
+            Model.mkdir.f();
+        })
+    </script>
+{% endblock %}

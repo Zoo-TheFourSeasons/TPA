@@ -1,0 +1,88 @@
+{% set title = '(∪｡∪)｡zzz' %}
+
+{% extends "index.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block ops %}
+    <button type="button" id="scan" class="btn" data-bs-toggle="modal"
+            data-bs-target="#scan-modal"><i class="fas fa-fw fa-search"></i>
+    </button>
+{% endblock %}
+{% block js %}
+    <script>
+        let target = $.url().param('target');
+
+        {#let http = 'http://' + document.domain + (location.port ? ":" + location.port : "");#}
+        {#let io_app = io.connect(http + '/security', {'sync disconnect on unload': true});#}
+        {##}
+        {#io_app.emit('join', {'at': 'progress'});#}
+        {#io_app.on('his', his);#}
+        {#io_app.on('progress', progress);#}
+
+        let Model = Object.create(ModelFH);
+        Model.$table = $table;
+        Model.target = target;
+        Model.signal = 'task';
+        Model.app = 'security:tsunami';
+        {#Model.io = io_app;#}
+
+        Model.font = {
+            'u': '/webs/' + Model.app + '/index'
+        };
+        Model.index = {
+            'u': '/' + Model.app + '/index',
+            'f': function () {
+                list_for_table(this, Model, undefined);
+            }
+        };
+        Model.mkdir = {
+            'u': '/' + Model.app + '/mkdir',
+            'modal_id': 'mkdir-modal',
+            '$btn': $("#mkdir-modal .commit-btn"),
+            'f': function () {
+                commit_from_model(this, Model, true)
+            }
+        };
+        Model.deletes = {
+            'u': '/' + Model.app + '/delete',
+            '$btn': $("#delete"),
+            'f': function () {
+                confirm_do_with_table(this, Model, "DELETE");
+            }
+        };
+        Model.touch = {
+            'u': '/' + Model.app + '/touch',
+            'suffix': '.py',
+            'modal_id': 'touch-modal',
+            '$btn': $("#touch-modal .commit-btn"),
+            'f': function () {
+                commit_from_model(this, Model, true)
+            },
+        };
+        Model.edit = {
+            'u': '/' + Model.app + '/touch',
+            'modal_id': 'view-modal',
+            '$btn': $("#view-modal .commit-btn"),
+            'f': function () {
+                commit_from_model(this, Model, false)
+            },
+        };
+        Model.scan = {
+            '$btn': $("#scan-modal .commit-btn"),
+            'action': 'tsunami:scan',
+            'modal_id': 'scan-modal',
+            'f': function () {
+                emit_from_model(this, Model);
+            }
+        };
+
+        $(document).ready(function () {
+            Model.index.f();
+            Model.mkdir.f();
+            Model.touch.f();
+            Model.deletes.f();
+            Model.scan.f();
+            Model.edit.f();
+        })
+    </script>
+{% endblock %}
+
