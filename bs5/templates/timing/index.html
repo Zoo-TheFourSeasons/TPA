@@ -3,6 +3,9 @@
 {% extends "index.html" %}
 {% block title %}{{ title }}{% endblock %}
 {% block ops %}
+    <button hidden id="commit" class="btn btn-view-file" data-bs-toggle="tooltip" data-bs-placement="bottom"
+            title="COMMIT">
+        <i class="fas fa-fw fa-code-commit"></i></button>
     <button disabled id="on" class="btn check-files" data-bs-toggle="tooltip"
             data-bs-placement="bottom"
             title="ON"><i class="fa-solid fa-fw fa-toggle-on"></i>

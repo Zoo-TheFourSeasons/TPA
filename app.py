@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """app
 """
+import os
+
 from apscheduler import events
 from flask import Flask
 from flask_socketio import SocketIO
