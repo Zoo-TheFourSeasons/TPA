@@ -1448,7 +1448,7 @@ class MetaFile(object):
 
     @classmethod
     def sf_path_open_sources(cls):
-        fp = os.path.join(os.path.dirname(cls.sf_path_fh()), 'OPEN-SOURCES')
+        fp = os.path.join(os.path.dirname(cls.sf_path_project()), 'OPEN-SOURCES')
         if os.path.exists(fp):
             return fp
         raise FileNotFoundError('project OPEN-SOURCES not found: %s' % fp)
