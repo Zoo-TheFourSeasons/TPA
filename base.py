@@ -529,7 +529,7 @@ class MetaFile(object):
             self.emit('his', data=ob + '\n', room=self.afp)
         if isinstance(self.ns, Namespace) and self.afp:
             self.ns.emit('his', data=ob + '\n', room=self.afp)
-        # print(ob)
+        print(ob)
 
         if nolog:
             ob = 'HIDDEN FOR SECURITY'

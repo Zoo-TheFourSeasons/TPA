@@ -136,7 +136,7 @@ def _(a, e):
         return jf({'status': False, 'message': 'app disabled: %s' % a})
 
     t = r.args.get('target', '')
-    if a in (cons.APP_ZOO, cons.APP_SEC) or e == cons.EDP_DF:
+    if a in (cons.APP_ZOO, cons.APP_SEC, cons.APP_ENC) or e == cons.EDP_DF:
         suffix = None
     else:
         suffix = '.' + e if e else a
