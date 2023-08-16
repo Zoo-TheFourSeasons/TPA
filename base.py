@@ -1502,6 +1502,10 @@ class MetaWebSocket(Namespace, MetaFile):
 
     def on_task(self, data):
         self.afp = data.get('at')
+        if self.afp in ins.ins_tasks:
+            if ins.ins_tasks.get(self.afp).status not in (self.E_STOP,):
+                self.print('WARNING: %s is running' % self.afp)
+                return
 
         def do(d):
             action = d.get('action')
@@ -1523,7 +1527,7 @@ class MetaWebSocket(Namespace, MetaFile):
                 self.print('END: %s' % datetime.datetime.now())
                 self.print('COST: %s, %s ' % (round(time.perf_counter() - ts1, 5),
                                               round(time.time() - ts2, 5)))
-            # todo
+            self.progress({'status': self.E_STOP, 'at': self.afp}, self.afp)
 
         self.socketio.start_background_task(do, data)
 
