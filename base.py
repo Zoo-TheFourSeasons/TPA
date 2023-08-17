@@ -489,7 +489,6 @@ class MetaFile(object):
         if self.event == self.E_EXECUTE:
             return
         elif self.event == self.E_STOP:
-            # self.print('\nSTOP BY EVENT')
             ins.ins_tasks.pop(self.afp, None)
             raise EOFError('STOP BY EVENT')
         while self.event == self.E_PAUSE:
@@ -1501,15 +1500,20 @@ class MetaWebSocket(Namespace, MetaFile):
         self.emit('progress', data=data, room=room)
 
     def on_task(self, data):
+        action = data.get('action')
+        event = action.split(':')[-1].upper()
+
         self.afp = data.get('at')
         if self.afp in ins.ins_tasks:
-            if ins.ins_tasks.get(self.afp).status not in (self.E_STOP,):
-                self.print('WARNING: %s is running' % self.afp)
+            status = ins.ins_tasks.get(self.afp).status
+            if event == self.E_EXECUTE and status in (self.E_EXECUTE,):
+                self.print('WARNING: %s IS RUNNING' % self.afp)
+                return
+            if event in (self.E_STOP, self.E_PAUSE) and status in (self.E_STOP,):
+                self.print('WARNING: %s IS NOT RUNNING' % self.afp)
                 return
 
         def do(d):
-            action = d.get('action')
-            event = action.split(':')[-1].upper()
             ts1 = time.perf_counter()
             ts2 = time.time()
 
