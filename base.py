@@ -515,32 +515,39 @@ class MetaFile(object):
             except Exception as e:
                 raise ValueError('dy error: %s, e: %s' % (t, e))
 
-    def print(self, ob, nolog=False):
-        if isinstance(ob, (dict, list, tuple)):
+    def print(self, pt, wt=None, nolog=False):
+        if isinstance(pt, (dict, list, tuple)):
             try:
-                ob = json.dumps(ob, indent=4)
+                pt = json.dumps(pt, indent=2)
             except Exception as err:
-                ob = json.dumps({'error': str(err), 'op': str(ob)}, indent=4)
+                pt = json.dumps({'error': str(err), 'pt': str(pt)}, indent=2)
         else:
-            ob = str(ob)
-
+            pt = str(pt)
         if isinstance(self, Namespace) and self.afp:
-            self.emit('his', data=ob + '\n', room=self.afp)
+            self.emit('his', data=pt + '\n', room=self.afp)
         if isinstance(self.ns, Namespace) and self.afp:
-            self.ns.emit('his', data=ob + '\n', room=self.afp)
-        print(ob)
-
-        if nolog:
-            ob = 'HIDDEN FOR SECURITY'
-
+            self.ns.emit('his', data=pt + '\n', room=self.afp)
+        print(pt)
         current_his = None if 'current_his' not in self.__dict__ else self.current_his
         if not current_his:
-            # print('WARNING: there is no current_his')
-            # if self.ns:
-            #     self.ns.emit_signal('his', 'WARNING: there is no current_his\n', room=self.at)
+            print('WARNING: THERE IS NOT CURRENT_HIS')
             return
+
+        if nolog:
+            wt = 'NOLOG IS True'
+        else:
+            if wt is not None:
+                if isinstance(wt, (dict, list, tuple)):
+                    try:
+                        wt = json.dumps(wt, indent=2)
+                    except Exception as err:
+                        wt = json.dumps({'error': str(err), 'wt': str(wt)}, indent=2)
+                else:
+                    wt = str(wt)
+            else:
+                wt = pt
         with open(current_his, 'a') as file:
-            file.write(ob + '\n')
+            file.write(wt + '\n')
 
     @staticmethod
     def __request_parser_args(args_r):
@@ -706,16 +713,16 @@ class MetaFile(object):
                     continue
                 if limit and i > offset + limit:
                     break
-                fp = cls.a_dfp(_app, afp)
-                stat = os.stat(fp)
+                _fp = cls.a_dfp(_app, afp)
+                stat = os.stat(_fp)
                 ctime = stat.st_ctime
                 mtime = stat.st_mtime
-                size = os.path.getsize(fp) / 1024.0
+                size = os.path.getsize(_fp) / 1024.0
                 size = str(round(size / 1024.0, 1)) + 'M' if size > 2048 else str(round(size, 1)) + 'K'
-                _, fn = opsp(fp)
+                _, fn = opsp(_fp)
                 r.append({
                     'fn': fn,
-                    'isdir': opid(fp),
+                    'isdir': opid(_fp),
                     'ctime': time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(ctime)),
                     'mtime': time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(mtime)),
                     'size': size,
@@ -735,7 +742,7 @@ class MetaFile(object):
             if opex(fp) and opid(fp):
                 files = [f for f in os.listdir(fp) if not f.startswith('.')]
                 if suffix:
-                    # tofix
+                    # to fix
                     files = [f for f in files if f.endswith(suffix) or opid(cls.a_dfp(app, opjn(target, f)))]
                 files.sort(reverse=True)
                 total = len(files)
@@ -1422,12 +1429,10 @@ class MetaFile(object):
     @staticmethod
     def sf_ip_weekly():
         return '192.168.98.7%s' % (datetime.datetime.now().weekday() + 1)
-        # return '192.168.252.17%s' % (datetime.datetime.now().weekday() + 1)
 
     @staticmethod
     def sf_ip_monthly():
         return '192.168.98.%s' % str(datetime.datetime.now().month)
-        # return '192.168.252.2%s' % str(datetime.datetime.now().month).zfill(2)
 
     @staticmethod
     def sf_ts_version(version):
