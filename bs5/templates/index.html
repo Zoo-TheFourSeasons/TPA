@@ -258,6 +258,7 @@
 {% include 'modal.html' %}
 {% endblock %}
 
+{# BOOKMARKS #}
 <div id="bk_md" class="modal" tabindex="-1" aria-labelledby="bk_hd"
      style="display: none;" aria-hidden="true">
     <div class="modal-dialog modal-me modal-dialog-centered">
@@ -286,6 +287,7 @@
         </div>
     </div>
 </div>
+{# HISTORY #}
 <div class="container-fluid">
     <div class="offcanvas offcanvas-end" data-bs-scroll="true" tabindex="-1" id="his"
          aria-labelledby="HISTORY"
@@ -294,9 +296,9 @@
             <div class="btn-group">
                 <button class="btn" data-bs-dismiss="offcanvas" aria-label="Close">
                     <i class="fa-solid fa-fw fa-close"></i></button>
+                <button class="btn join"><i class="fas fa-fw fa-inbox"></i></button>
                 <button id="exe" class="btn execute"><i class="fas fa-fw fa-play"></i></button>
-                <button id="exe_ctx" class="btn execute"><i
-                        class="fas fa-fw fa-arrow-up-short-wide"></i>
+                <button id="exe_ctx" class="btn execute"><i class="fas fa-fw fa-arrow-up-short-wide"></i>
                 </button>
                 <button class="btn pause"><i class="fas fa-fw fa-pause"></i></button>
                 <button class="btn stop"><i class="fas fa-fw fa-stop"></i></button>
@@ -312,6 +314,7 @@
         </div>
     </div>
 </div>
+{# SPATIOTEMPORAL #}
 <div id="spatiotemporal_modal" class="modal" tabindex="-1" aria-labelledby="spatiotemporal-header"
      aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
@@ -475,6 +478,7 @@
             });
         });
 
+        {# history #}
         $bd.on('click', '.his', function () {
             let target = this.name;
             console.log('view:' + model.u);
@@ -518,7 +522,6 @@
         });
 
         {# view callback #}
-
         function cb_view(rsp) {
             let $vw = $("#viewer_md");
             $vw.empty();
@@ -581,6 +584,9 @@
 
         {# view #}
         $bd.on('click', '.view-file', function () {
+
+            leave_room()
+
             if (this.name === "") {
                 at = this.text;
             } else {
@@ -595,18 +601,14 @@
             }
 
             let uri = '/' + app + '/view?target=' + afp + '&tk=' + tk;
-
             $('.btn-view-file').each(function () {
                     this.removeAttribute('hidden');
                 }
             );
 
             let $img = $('img');
-            {#let $textarea = $('textarea');#}
-            {#$textarea.hide();#}
             $img.hide();
             let that = this;
-
             get({
                 'url': uri,
                 'data': {},
@@ -625,14 +627,9 @@
                     }
                 }
             });
+        });
 
-            {#let tmp = app.split(':');#}
-            {#if (tmp.length === 2) {#}
-            {#    aep = '/' + tmp[0] + ':' + tmp[1];#}
-            {# } else {#}
-            {#    aep = '/' + tmp[0];#}
-            {# }#}
-
+        function join_room() {
             if (app_io !== undefined) {
                 app_io.close();
             }
@@ -640,6 +637,17 @@
             app_io.emit('join', {'at': at});
             app_io.on('his', his);
             app_io.on('progress', progress);
+        }
+
+        function leave_room(){
+            if (app_io !== undefined) {
+                app_io.close();
+            }
+        }
+
+        {# join room #}
+        $bd.on('click', '.join', function () {
+            join_room()
         });
 
         {# edit #}
@@ -689,6 +697,7 @@
             }
             $('#his pre').empty();
             $('.execute').attr('disabled', true);
+            join_room()
             app_io.emit('task', params);
         });
 
@@ -702,6 +711,7 @@
                 'params': {'target': at}
             };
             $('.stop').attr('disabled', true);
+            join_room()
             app_io.emit('task', params);
         });
 
@@ -714,6 +724,7 @@
                 'echo': false,
                 'params': {'target': at}
             };
+            join_room()
             app_io.emit('task', params);
         });
 
