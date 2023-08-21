@@ -72,19 +72,11 @@
                 commit_from_model(this, Model, true)
             },
         };
-        Model.scan_meta_resources = {
-            '$btn': $("#scan-resources"),
-            'action': 'yft:scan-meta-resources',
-            'f': function () {
-                confirm_do_ns(this, Model, "SCAN META RESOURCES");
-            }
-        };
         $(document).ready(function () {
             Model.index.f();
             Model.mkdir.f();
             Model.touch.f();
             Model.deletes.f();
-            Model.scan_meta_resources.f();
         })
     </script>
 {% endblock %}
