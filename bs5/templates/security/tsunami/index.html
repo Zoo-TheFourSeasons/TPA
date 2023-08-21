@@ -11,19 +11,16 @@
     <script>
         let target = $.url().param('target');
 
-        {#let http = 'http://' + document.domain + (location.port ? ":" + location.port : "");#}
-        {#let io_app = io.connect(http + '/security', {'sync disconnect on unload': true});#}
-        {##}
-        {#io_app.emit('join', {'at': 'progress'});#}
-        {#io_app.on('his', his);#}
-        {#io_app.on('progress', progress);#}
-
+        let http = 'http://' + document.domain + (location.port ? ":" + location.port : "");
         let Model = Object.create(ModelFH);
         Model.$table = $table;
         Model.target = target;
         Model.signal = 'task';
         Model.app = 'security:tsunami';
-        {#Model.io = io_app;#}
+        Model.io = io.connect(http + '/security', {'sync disconnect on unload': true});
+        Model.io.emit('join', {'at': 'progress'});
+        Model.io.on('his', his);
+        Model.io.on('progress', progress);
 
         Model.font = {
             'u': '/webs/' + Model.app + '/index'

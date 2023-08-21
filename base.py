@@ -148,6 +148,51 @@ def make_response_with_headers(data):
     return r
 
 
+def fix_service_providers_in_neutron_conf(func):
+    def _wrapper(_ins, _command, node, stacks):
+        _file = _command[cons.F_FILE]
+        _file = _file.strip()
+
+        if _file.endswith('neutron.conf'):
+            section_name = 'service_providers'
+            section_name__ = ''.join(('[', section_name, ']'))
+
+            # get service_providers in yaml
+            _data = _command[cons.O_CONF]
+            service_providers_yaml = _data.pop(section_name, {})
+            service_providers_yaml = ['='.join((k, v)) for k, v in service_providers_yaml.items()]
+
+            # get service_providers in conf
+            service_providers_conf = []
+            with open(_file, 'r') as f:
+                content = f.read()
+                content = '\n' + content.replace(' ', '')
+                items = content.split('\n' + section_name__)
+                # agent.echo({'print': 'self.FIELD_DETAIL items: %s' % json.dumps(items)})
+            if len(items) == 2:
+                head = items[0]
+                service_providers_str = items[1]
+                tail = '\n'
+                if '[' in service_providers_str:
+                    tail += service_providers_str[service_providers_str.find('['):]
+                    service_providers_str = service_providers_str[:service_providers_str.find('[')]
+                service_providers_conf = service_providers_str.split('\n')
+                # truncation
+                with open(_file, 'w') as f:
+                    f.write(head + tail)
+
+            v = func(_ins, _command, node, stacks)
+            service_providers = list(set(service_providers_yaml + service_providers_conf))
+            with open(_file, 'a') as f:
+                f.write(section_name__ + '\n' + '\n'.join(service_providers))
+            return v
+
+        v = func(_ins, _command, node, stacks)
+        return v
+
+    return _wrapper
+
+
 class MetaProcess(multiprocessing.Process):
 
     def __init__(self, func, *args, **kwargs):
@@ -1405,6 +1450,10 @@ class MetaFile(object):
         return cls.sf_yyyy() + cls.sf_mm()
 
     @classmethod
+    def sf_yyyymmdd(cls):
+        return cls.sf_yyyy() + cls.sf_mm() + cls.sf_dd()
+
+    @classmethod
     def sf_mmdd(cls):
         return cls.sf_mm() + cls.sf_dd()
 
@@ -1424,7 +1473,7 @@ class MetaFile(object):
     @classmethod
     def sf_ddhhmmss(cls):
         now = datetime.datetime.now()
-        return cls.sf_dd() + cls.sf_hh() + str(now.minute).zfill(2) + str(now.minute).zfill(2)
+        return cls.sf_dd() + cls.sf_hh() + str(now.minute).zfill(2) + str(now.second).zfill(2)
 
     @staticmethod
     def sf_ip_weekly():
@@ -1472,6 +1521,7 @@ class MetaFile(object):
             'DDHHmmss': self.sf_ddhhmmss,
             'YYYY': self.sf_yyyy,
             'YYYYMM': self.sf_yyyymm,
+            'YYYYMMDD': self.sf_yyyymmdd,
             'IP_WEEKLY': self.sf_ip_weekly,
             'IP_MONTHLY': self.sf_ip_monthly,
             'GET_TS_VERSION': self.sf_ts_version,
