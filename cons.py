@@ -7,7 +7,6 @@ APP_ALL = 'all'
 APP_ZOO = 'zoo'
 APP_SEC = 'security'
 APP_FIN = 'finansis'
-EDP_DF = 'df'
 APP_KNO = 'know'
 APP_DSP = 'dsp'
 APP_HIS = 'history'
@@ -17,6 +16,10 @@ APP_TIM = 'timing'
 APP_USR = 'user'
 APP_STA = 'star'
 APP_SPA = 'spatiotemporal'
+
+EDP_DF = 'df'
+EDP_PY = 'py'
+EDP_IM = 'image'
 
 
 class Apps(object):

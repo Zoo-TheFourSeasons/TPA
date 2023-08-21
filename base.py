@@ -1549,7 +1549,12 @@ class MetaWebSocket(Namespace, MetaFile):
 
     def on_join(self, data):
         self.print('join: %s' % data)
-        join_room(data.get('at'))
+        afp = data.get('at')
+        join_room(afp)
+        if afp in ins.ins_tasks:
+            status = ins.ins_tasks.get(afp).status
+            if status in (self.E_EXECUTE, self.E_PAUSE):
+                self.progress({'status': status, 'at': afp}, afp)
 
     def progress(self, data, room):
         self.emit('progress', data=data, room=room)
