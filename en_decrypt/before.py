@@ -1,14 +1,17 @@
 import os
 
-from en_decrypt.cons import FDS
+from base import MetaFile
+import cons
 
 
 def init_folders():
-    for app, fds in FDS.items():
-        for fd, path in fds.items():
+    fds = [{'his': os.path.join(MetaFile.a_ddp(cons.APP_HIS), MetaFile.a_edp(adp)),
+            'data': MetaFile.a_ddp(adp)} for adp in cons.Apps.apps.get(cons.APP_ENC)]
+    for fd in fds:
+        for _, path in fd.items():
             if not os.path.exists(path):
                 os.makedirs(path)
-                print('makedirs: %s' % path)
+                print('make dirs: %s' % path)
 
 
 inits = [init_folders, ]

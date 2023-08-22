@@ -680,12 +680,7 @@ class MetaFile(object):
         # app data file path
         # afp = 'timing,ENCRYPT.tim'
         app, dfp = afp.split(',')
-        ap = cls.a_ddp(app)
-        fp = opjn(ap, dfp)
-        if not opap(fp).startswith(ap):
-            raise ValueError('unknown target: %s' % dfp)
-        # fp = '/home/zin/Desktop/_Y/TPA/timing/data/ENCRYPT.tim'
-        return fp
+        return cls.a_dfp(app, dfp)
 
     @classmethod
     def a_dfp(cls, app, target):
@@ -701,12 +696,11 @@ class MetaFile(object):
 
     @classmethod
     def aep(cls, app, edp, target):
-        fp = cls.a_afp(':'.join((app, edp)) if edp else app + ',' + target)
-        return fp
+        return cls.a_afp(':'.join((app, edp)) if edp else app + ',' + target)
 
     @staticmethod
     def a_ddp(a: str):
-        # a: app
+        # a: app:edp
         # app data dir path
         # a = 'timing'
         a, e = a.split(':') if ':' in a else (a, None)
@@ -718,6 +712,18 @@ class MetaFile(object):
         dp = dp if not e else opjn(dp, e)
         # dp = '/home/zin/Desktop/_Y/TPA/timing/data'
         return dp
+
+    @staticmethod
+    def a_edp(a: str):
+        # a: app:edp
+        # return edp
+        return a.split(':')[1] if ':' in a else a
+
+    @classmethod
+    def a_hdp(cls, a: str):
+        # a: app:edp or edp
+        edp = a.split(':')[1] if ':' in a else a
+        return opjn(cls.a_ddp(cons.APP_HIS), edp)
 
     @classmethod
     @independence.timer
@@ -897,14 +903,14 @@ class MetaFile(object):
             if ft in fts and fts[ft]:
                 v = fts[ft]
                 if v == cons.APP_ALL:
-                    v = [a for a in cons.Apps.apps if a not in (cons.APP_ZOO, cons.APP_ENC)]
+                    v = [a for a in cons.Apps.apps.keys() if a not in (cons.APP_ZOO, cons.APP_ENC)]
                 else:
                     v = v.split(' ')
                 # filter 
                 if ins.ins_bps:
                     v = [i for i in v if i in ins.ins_bps]
                 apps = []
-                [apps.extend(cons.Apps.edps(i)) for i in v]
+                [apps.extend(cons.Apps.apps.get(i)) for i in v]
                 print('apps', apps)
                 return apps
             return [app, ]

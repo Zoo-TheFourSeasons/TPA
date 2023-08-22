@@ -71,7 +71,7 @@ def job_submitted(event):
 
 app_ = create_app()
 
-# init apscheduler
+# init APScheduler
 scheduler = APScheduler()
 scheduler.init_app(app_)
 scheduler.start()
@@ -227,7 +227,7 @@ def _(a, e):
 @ind.wex
 @ind.rtk
 def _():
-    _bps = [bp for bp in cons.Apps.apps if r.args.get(bp, 'false').lower() == 'true']
+    _bps = [bp for bp in cons.Apps.apps.keys() if r.args.get(bp, 'false').lower() == 'true']
     print('restart:', _bps)
     ins.ins_que.put(_bps)
     return jf({'status': True, 'message': ', '.join(_bps)})

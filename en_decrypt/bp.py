@@ -6,13 +6,11 @@ from flask import Blueprint, request, jsonify
 from en_decrypt.assistant import EncryptHelper as Ass
 from app import socket_io
 from base import MetaWebSocket
-from en_decrypt import cons
 from cons import APP_ENC as APP
 import independence as ind
 
 
 class TsunamiNameSpace(MetaWebSocket):
-    fds = cons.FDS[cons.EDP_ENC]
 
     def __init__(self, *args, **kwargs):
         MetaWebSocket.__init__(self, *args, **kwargs)

@@ -2,6 +2,7 @@ import os
 
 PATH_PROJECT = os.path.dirname(os.path.abspath(__file__))
 PATH_HISTORY = os.path.join(PATH_PROJECT, 'history')
+PATH_ZOO = PATH_PROJECT
 
 APP_ALL = 'all'
 APP_ZOO = 'zoo'
@@ -23,33 +24,20 @@ EDP_IM = 'image'
 
 
 class Apps(object):
-    apps = (
-        APP_SEC,
-        APP_ZOO,
-        APP_FIN,
-        APP_KNO,
-        APP_DSP,
-        APP_HIS,
-        APP_ENC,
-        APP_SQU,
-        APP_TIM,
-        # APP_USR,
-        APP_STA,
-        APP_SPA,
-    )
-
-    @classmethod
-    def edps(cls, app):
-        if app == APP_DSP:
-            return app + ':yfd', app + ':yft'
-        elif app == APP_KNO:
-            return app + ':site', app + ':dom'
-        elif app == APP_ZOO:
-            return app + ':images',
-        elif app == APP_FIN:
-            return app + ':py', app + ':df'
-        else:
-            return app,
+    apps = {
+        APP_SEC: (APP_SEC + ':tsunami', APP_SEC + ':suricata'),
+        APP_ZOO: (APP_ZOO + ':images', ),
+        APP_FIN: (APP_FIN + ':py', APP_FIN + ':df'),
+        APP_KNO: (APP_KNO + ':site', APP_KNO + ':dom'),
+        APP_DSP: (APP_DSP + ':yfd', APP_DSP + ':yft'),
+        APP_HIS: (APP_HIS, ),
+        APP_ENC: (APP_ENC, ),
+        APP_SQU: (APP_SQU, ),
+        APP_TIM: (APP_TIM, ),
+        APP_USR: (APP_USR, ),
+        APP_STA: (APP_STA, ),
+        APP_SPA: (APP_SPA, ),
+    }
 
 
 APPS_DEFAULT = (
@@ -302,3 +290,5 @@ O_TIMING_TRIGGER = 'TRIGGER'
 
 V_LOCAL = ('LOCAL', 'LOCALHOST', '', '127.0.0.1')
 O_NOLOG = 'NOLOG'
+F_STARS = 'STARS'
+F_BOOKMARKS = 'BOOKMARKS'

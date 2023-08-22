@@ -9,7 +9,7 @@ import cons
 def app_launcher(args):
     print('app_launcher:', args.ip, args.port)
     bps = args.bps
-    ins.ins_bps = list(cons.APPS_DEFAULT) if not bps else list(cons.Apps.apps) if bps == cons.APP_ALL else bps.split(',')
+    ins.ins_bps = list(cons.APPS_DEFAULT) if not bps else list(cons.Apps.apps.keys()) if bps == cons.APP_ALL else bps.split(',')
     bps_ins = (importlib.import_module(b + '.bp') for b in ins.ins_bps if b in cons.Apps.apps)
     bfs_ins = (importlib.import_module(b + '.before') for b in ins.ins_bps if b in cons.Apps.apps)
     [app_.register_blueprint(i.bp) for i in bps_ins]

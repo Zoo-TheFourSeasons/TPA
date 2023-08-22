@@ -7,7 +7,7 @@ import cons
 
 if __name__ == '__main__':
     # register bp
-    ins.ins_bps = list(cons.Apps.apps)
+    ins.ins_bps = list(cons.Apps.apps.keys())
     bps_ins = (importlib.import_module(b + '.bp') for b in ins.ins_bps if b in cons.Apps.apps)
     bfs_ins = (importlib.import_module(b + '.before') for b in ins.ins_bps if b in cons.Apps.apps)
     [app_.register_blueprint(i.bp) for i in bps_ins]
