@@ -2,37 +2,15 @@
 # !/bin/python3
 
 import os
-import time
 import ctypes
-
-# from Crypto.Cipher import AES
 
 from base import MetaFile
 
 
 class EncryptHelper(MetaFile):
-    # 已加密文件头部特征
-    header_encrypt = 'encrypted:'
-    bin_header_encrypt = bytes(header_encrypt.encode('utf-8'))
-    len_header_encrypt = len(bin_header_encrypt)
 
-    def __init__(self, psw_aes=None, psw_stream=None, at=None):
-        super(EncryptHelper, self).__init__()
-        self.afp = at
-        # AES密钥
-        self.psw_aes = psw_aes
-        self.bin_psw_aes = bytearray(psw_aes.encode('utf-8'))
-        # 流密钥
-        self.psw_stream = psw_stream
-        self.bin_psw_stream = bytearray(psw_stream.encode('utf-8'))
-        # 加密/解密
-        self.do_encrypt = True
-        # 单个文件大小最大值
-        self.max_size = 64
-        # 仅处理
-        self.include = []
-        # 不处理
-        self.exclude = []
+    def __init__(self):
+        super(MetaFile, self).__init__()
 
     @staticmethod
     def _get_file_size(_file):
@@ -40,72 +18,6 @@ class EncryptHelper(MetaFile):
         _size = os.path.getsize(_file) / 1024 / 1024.00
         # print(_file, _size)
         return _size
-
-    def _encrypt_by_str(self, __path_in):
-        # 流加密, 对称
-        # print('encrypt_by_str')
-        with open(__path_in, 'rb') as f:
-            raw = f.read()
-
-        length_key = len(self.psw_stream)
-        encrypt = bytearray()
-        encrypt += self.bin_header_encrypt
-        k = 0
-        for _i in raw:
-            _j = self.bin_psw_stream[k % length_key]
-            encrypt.append(_i ^ _j)
-            k += 1
-        try:
-            with open(__path_in, 'wb') as f:
-                f.write(encrypt)
-        except Exception as e:
-            print('\rpass', __path_in, e)
-
-    def _encrypt_by_aes(self, __path_in):
-        # AES加密, 对称
-        # print('encrypt_by_aes')
-        with open(__path_in, 'rb') as f:
-            cipher = AES.new(self.bin_psw_aes, AES.MODE_EAX)
-            cipher_text, tag = cipher.encrypt_and_digest(f.read())
-        try:
-            with open(__path_in, 'wb') as f:
-                [f.write(x) for x in (cipher.nonce, tag, cipher_text)]
-        except Exception as e:
-            print('\rpass:', __path_in, e)
-
-    def _decrypt_by_aes(self, __path_in):
-        # AES解密, 对称
-        # print('decrypt_by_aes')
-        with open(__path_in, 'rb') as f:
-            nonce, tag, cipher_text = [f.read(x) for x in (16, 16, -1)]
-            cipher = AES.new(self.bin_psw_aes, AES.MODE_EAX, nonce)
-        try:
-            text = cipher.decrypt_and_verify(cipher_text, tag)
-
-            with open(__path_in, 'wb') as f:
-                f.write(text)
-        except Exception as e:
-            print('\rpass', __path_in, e)
-
-    def _decrypt_by_str(self, __path_in):
-        # 流解密, 对称
-        # print('decrypt_by_str')
-        with open(__path_in, 'rb') as f:
-            _raw = f.read()
-            raw = _raw[self.len_header_encrypt:]
-
-        length_key = len(self.psw_stream)
-        decrypt = bytearray()
-        k = 0
-        for _i in raw:
-            _j = self.bin_psw_stream[k % length_key]
-            decrypt.append(_i ^ _j)
-            k += 1
-        try:
-            with open(__path_in, 'wb') as f:
-                f.write(decrypt)
-        except Exception as e:
-            print('\rpass', __path_in, e)
 
     @classmethod
     def _combine(cls, _path_in):
@@ -166,113 +78,6 @@ class EncryptHelper(MetaFile):
                 # 分片后移除自身
                 os.remove(_path)
 
-    def _is_pass(self, _file):
-        # x.py.i.serial
-        # 分片文件
-        if _file.endswith('.serial'):
-            # 计算文件名
-            _file = '.'.join(_file.split('.')[:-2])
-
-        # 仅处理
-        if self.include:
-            # 不在仅处理列表内
-            if _file not in self.include:
-                # 跳过该文件
-                return True
-        # 不处理
-        elif self.exclude:
-            # 在不处理列表内
-            if _file in self.include:
-                # 跳过该文件
-                return True
-        # 其他情况不跳过该文件
-        return False
-
-    def _encrypt_or_decrypt(self, _path_in):
-
-        if not os.path.exists(_path_in):
-            return
-
-        ts = time.time()
-
-        def _do(_path_file):
-
-            with open(_path_file, 'rb') as f:
-                text = f.read()
-                # 忽略空文件
-                if not text.strip():
-                    print('ignore:', _path_file, end='')
-                    return
-
-            with open(_path_file, 'rb') as f:
-                line = f.readline()
-
-            # 文件已加密
-            if line.startswith(self.bin_header_encrypt):
-                # 正在进行加密
-                if self.do_encrypt:
-                    # 忽略
-                    return
-                # 正在进行解密
-                # 流解密
-                self._decrypt_by_str(_path_file)
-                # AES解密
-                self._decrypt_by_aes(_path_file)
-                return
-            # 文件未加密
-            # 正在进行加密
-            if self.do_encrypt:
-                # AES加密
-                self._encrypt_by_aes(_path_file)
-                # 流加密
-                self._encrypt_by_str(_path_file)
-                return
-            # 正在进行解密
-            pass
-
-        if os.path.isfile(_path_in):
-            _do(_path_in)
-            print('\nend encrypt_file, cost:', time.time() - ts, ' file index:', 1)
-            return
-
-        if os.path.isdir(_path_in):
-            # 计算总数
-            total = sum([len(files) for root, dirs, files in os.walk(_path_in)])
-            index = 0
-            for root, dirs, files in os.walk(_path_in):
-                for file in files:
-                    index += 1
-                    # 检查是否跳过该文件
-                    if self._is_pass(file):
-                        continue
-
-                    _file = os.path.join(root, file)
-                    _do(_file)
-                    print('\rprocess:', index, '/', total, end='')
-            print('\nend encrypt_file, cost:', time.time() - ts, ' file index:', index)
-
-    @classmethod
-    def is_encrypted(cls, _path_in):
-        with open(_path_in, 'rb') as f:
-            line = f.readline()
-
-        return True if line.startswith(cls.bin_header_encrypt) else False
-
-    def security(self, _path_in):
-        # 文件加解密
-        print('do_encrypt:', self.do_encrypt)
-        print('path_in:', _path_in)
-
-        # 加密前分片
-        if self.do_encrypt:
-            self._separate(_path_in, 45)
-
-        # 加密/解密
-        self._encrypt_or_decrypt(_path_in)
-        # 解密后组装
-        if not self.do_encrypt:
-            self._combine(_path_in)
-
     @classmethod
     def separate(cls, app, target, do_separate, max_size):
         # 文件加解密
@@ -291,8 +96,6 @@ class EncryptHelper(MetaFile):
     def security_by_golang(
             cls, app, target, do_encrypt, psw_aes, nonce, psw_stream,
             max_size: int = 45):
-        # parser
-        # self.ns = ns
 
         for path_in in target.split(','):
             target_abs = cls.a_dfp(app, path_in)

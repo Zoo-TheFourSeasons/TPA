@@ -3,7 +3,7 @@ import traceback
 
 from flask import Blueprint, request, jsonify
 
-from en_decrypt.assistant import EncryptHelper as Ass
+from en_decrypt.assistant import EncryptHelper as Helper
 from app import socket_io
 from base import MetaWebSocket
 from cons import APP_ENC as APP
@@ -27,7 +27,7 @@ class TsunamiNameSpace(MetaWebSocket):
         nonce = params.get('nonce')
         tp = params.get('type')
 
-        yfd = Ass(at=at)
+        yfd = Helper()
         for target in params.get('target').split(','):
             try:
                 yfd.security_by_golang(APP, tp, aes, stream, nonce, target)
@@ -48,7 +48,7 @@ def en_decrypt():
     psw_stream = request.args.get('psw_stream')
     nonce = request.args.get('nonce')
     _type = request.args.get('type')
-    Ass.security_by_golang(APP, request.args.get('target'), _type, psw_aes, nonce, psw_stream)
+    Helper.security_by_golang(APP, request.args.get('target'), _type, psw_aes, nonce, psw_stream)
     return jsonify({'status': True})
 
 
@@ -58,5 +58,5 @@ def separate():
     _type = request.args.get('type')
     target = request.args.get('target')
     max_size = request.args.get('max_size')
-    Ass.separate(APP, target, _type, max_size)
+    Helper.separate(APP, target, _type, max_size)
     return jsonify({'status': True})
