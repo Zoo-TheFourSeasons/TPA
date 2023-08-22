@@ -34,7 +34,7 @@ class Apps(object):
         APP_ENC: (APP_ENC, ),
         APP_SQU: (APP_SQU, ),
         APP_TIM: (APP_TIM, ),
-        APP_USR: (APP_USR, ),
+        # APP_USR: (APP_USR, ),
         APP_STA: (APP_STA, ),
         APP_SPA: (APP_SPA, ),
     }

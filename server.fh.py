@@ -1,9 +1,10 @@
 # coding=utf-8
-import os
+import importlib
 import argparse
 
 from app import app_, socket_io
 import cons
+import ins
 
 
 def app_launcher(args):
