@@ -1207,7 +1207,8 @@ class MetaFile(object):
         return _quarters
 
     @classmethod
-    def func_items(cls, value: dict, func, _=False):
+    def func_items(cls, value: dict, func, dumping=False):
+        # dumping can not been remove
         if not isinstance(value, dict):
             raise TypeError('!!! __VALUE TYPE ERROR')
 
@@ -1366,7 +1367,8 @@ class MetaFile(object):
         return d
 
     @classmethod
-    def func_transform(cls, value: str, _: dict, __=False):
+    def func_transform(cls, value: str, _: dict, dumping=False):
+        # dumping can not been remove
         # transform --
         if not value.startswith('--'):
             return value
