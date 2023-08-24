@@ -218,9 +218,6 @@ class MetaDummyProcess(Process):
 
 
 class MetaStack(object):
-    # F_NODES = 'NODES'
-    # F_ROLES = 'ROLES'
-    # F_LOCAL = ('LOCAL', 'LOCALHOST', '', '127.0.0.1')
 
     def __init__(self, setting):
         self.roles = {}
@@ -527,19 +524,19 @@ class MetaFile(object):
         if not self.event:
             return
 
-        self.status = self.event
-        if isinstance(self.ns, Namespace):
-            self.ns.progress({'status': self.status, 'at': self.afp}, self.afp)
+        status = self.event
+        if isinstance(self.ns, MetaWebSocket):
+            self.ns.progress({'status': status, 'at': self.afp}, self.afp)
 
-        if self.event == self.E_EXECUTE:
+        if status == self.E_EXECUTE:
             return
-        elif self.event == self.E_STOP:
+        elif status == self.E_STOP:
             ins.ins_tasks.pop(self.afp, None)
             raise EOFError('STOP BY EVENT')
-        while self.event == self.E_PAUSE:
+        while status == self.E_PAUSE:
             time.sleep(1.2345)
-            if isinstance(self.ns, Namespace):
-                self.ns.progress({'status': self.status, 'at': self.afp}, self.afp)
+            if isinstance(self.ns, MetaWebSocket):
+                self.ns.progress({'status': status, 'at': self.afp}, self.afp)
 
     @staticmethod
     def ly(t):
@@ -563,14 +560,14 @@ class MetaFile(object):
     def print(self, pt, wt=None, nolog=False):
         if isinstance(pt, (dict, list, tuple)):
             try:
-                pt = json.dumps(pt, indent=2)
+                pt = json.dumps(pt, default=str, indent=2)
             except Exception as err:
                 pt = json.dumps({'error': str(err), 'pt': str(pt)}, indent=2)
         else:
             pt = str(pt)
-        if isinstance(self, Namespace) and self.afp:
+        if isinstance(self, MetaWebSocket) and self.afp:
             self.emit('his', data=pt + '\n', room=self.afp)
-        if isinstance(self.ns, Namespace) and self.afp:
+        if isinstance(self.ns, MetaWebSocket) and self.afp:
             self.ns.emit('his', data=pt + '\n', room=self.afp)
         print(pt)
         current_his = None if 'current_his' not in self.__dict__ else self.current_his
@@ -584,7 +581,7 @@ class MetaFile(object):
             if wt is not None:
                 if isinstance(wt, (dict, list, tuple)):
                     try:
-                        wt = json.dumps(wt, indent=2)
+                        wt = json.dumps(wt, default=str, indent=2)
                     except Exception as err:
                         wt = json.dumps({'error': str(err), 'wt': str(wt)}, indent=2)
                 else:
@@ -1210,7 +1207,7 @@ class MetaFile(object):
         return _quarters
 
     @classmethod
-    def func_items(cls, value: dict, func, dumping=False):
+    def func_items(cls, value: dict, func, _=False):
         if not isinstance(value, dict):
             raise TypeError('!!! __VALUE TYPE ERROR')
 
@@ -1266,13 +1263,13 @@ class MetaFile(object):
                 # with param
                 func, param = field.split('(') if '(' in field else (field, None)
 
-                if func not in self.STRING_FUNCTIONS:
+                if func not in self.functions:
                     raise ValueError('function error: %s' % func)
                 if param is None:
-                    vv = self.STRING_FUNCTIONS[func]()
+                    vv = self.functions.get(func)()
                     raw = lc + field + rc
                 else:
-                    vv = self.STRING_FUNCTIONS[func](param)
+                    vv = self.functions.get(func)(param)
                     raw = lc + field + rc + ')'
                 mix = mix.replace(raw, vv)
             return mix
@@ -1369,7 +1366,7 @@ class MetaFile(object):
         return d
 
     @classmethod
-    def func_transform(cls, value: str, _: dict, dumping=False):
+    def func_transform(cls, value: str, _: dict, __=False):
         # transform --
         if not value.startswith('--'):
             return value
@@ -1516,7 +1513,7 @@ class MetaFile(object):
         return self.ins.current_his
 
     @property
-    def STRING_FUNCTIONS(self):
+    def functions(self):
         return {
             'MMDDHH': self.sf_mmddhh,
             'MMDD': self.sf_mmdd,

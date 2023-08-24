@@ -20,7 +20,7 @@ class TsunamiNameSpace(MetaWebSocket):
 
     def api_execute(self, data):
         print('api_execute', data)
-        at = data.get('at')
+        # at = data.get('at')
         params = data.get('params')
         aes = params.get('psw_aes')
         stream = params.get('psw_stream')
