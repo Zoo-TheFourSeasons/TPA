@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../tad" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../tristack-install" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../tristack/v1/tristack-api" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../tristack/v1/tristack-lib" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../tristack/v2/tristack-api" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../tristack/v2/tristack-lib" vcs="Git" />
+  </component>
+</project>
