@@ -148,49 +148,49 @@ def make_response_with_headers(data):
     return r
 
 
-def fix_service_providers_in_neutron_conf(func):
-    def _wrapper(_ins, _command, node, stacks):
-        _file = _command[cons.F_FILE]
-        _file = _file.strip()
-
-        if _file.endswith('neutron.conf'):
-            section_name = 'service_providers'
-            section_name__ = ''.join(('[', section_name, ']'))
-
-            # get service_providers in yaml
-            _data = _command[cons.O_CONF]
-            service_providers_yaml = _data.pop(section_name, {})
-            service_providers_yaml = ['='.join((k, v)) for k, v in service_providers_yaml.items()]
-
-            # get service_providers in conf
-            service_providers_conf = []
-            with open(_file, 'r') as f:
-                content = f.read()
-                content = '\n' + content.replace(' ', '')
-                items = content.split('\n' + section_name__)
-                # agent.echo({'print': 'self.FIELD_DETAIL items: %s' % json.dumps(items)})
-            if len(items) == 2:
-                head = items[0]
-                service_providers_str = items[1]
-                tail = '\n'
-                if '[' in service_providers_str:
-                    tail += service_providers_str[service_providers_str.find('['):]
-                    service_providers_str = service_providers_str[:service_providers_str.find('[')]
-                service_providers_conf = service_providers_str.split('\n')
-                # truncation
-                with open(_file, 'w') as f:
-                    f.write(head + tail)
-
-            v = func(_ins, _command, node, stacks)
-            service_providers = list(set(service_providers_yaml + service_providers_conf))
-            with open(_file, 'a') as f:
-                f.write(section_name__ + '\n' + '\n'.join(service_providers))
-            return v
-
-        v = func(_ins, _command, node, stacks)
-        return v
-
-    return _wrapper
+# def fix_service_providers_in_neutron_conf(func):
+#     def _wrapper(_ins, _command, node, stacks):
+#         _file = _command[cons.F_FILE]
+#         _file = _file.strip()
+#
+#         if _file.endswith('neutron.conf'):
+#             section_name = 'service_providers'
+#             section_name__ = ''.join(('[', section_name, ']'))
+#
+#             # get service_providers in yaml
+#             _data = _command[cons.O_CONF]
+#             service_providers_yaml = _data.pop(section_name, {})
+#             service_providers_yaml = ['='.join((k, v)) for k, v in service_providers_yaml.items()]
+#
+#             # get service_providers in conf
+#             service_providers_conf = []
+#             with open(_file, 'r') as f:
+#                 content = f.read()
+#                 content = '\n' + content.replace(' ', '')
+#                 items = content.split('\n' + section_name__)
+#                 # agent.echo({'print': 'self.FIELD_DETAIL items: %s' % json.dumps(items)})
+#             if len(items) == 2:
+#                 head = items[0]
+#                 service_providers_str = items[1]
+#                 tail = '\n'
+#                 if '[' in service_providers_str:
+#                     tail += service_providers_str[service_providers_str.find('['):]
+#                     service_providers_str = service_providers_str[:service_providers_str.find('[')]
+#                 service_providers_conf = service_providers_str.split('\n')
+#                 # truncation
+#                 with open(_file, 'w') as f:
+#                     f.write(head + tail)
+#
+#             v = func(_ins, _command, node, stacks)
+#             service_providers = list(set(service_providers_yaml + service_providers_conf))
+#             with open(_file, 'a') as f:
+#                 f.write(section_name__ + '\n' + '\n'.join(service_providers))
+#             return v
+#
+#         v = func(_ins, _command, node, stacks)
+#         return v
+#
+#     return _wrapper
 
 
 class MetaProcess(multiprocessing.Process):
@@ -218,6 +218,20 @@ class MetaDummyProcess(Process):
 
 
 class MetaStack(object):
+    O_AUTH_TYPE = 'AUTH-TYPE'
+    O_AUTH_TOKEN = 'TOKEN'
+    O_AUTH_SESSION = 'SESSION'
+    O_AUTH_NONE = 'NONE'
+    O_HEADERS = 'HEADERS'
+    O_HOSTS = 'HOSTS'
+    O_HOST_DEFAULT = 'HOST_DEFAULT'
+    O_HOST_LOGS = 'HOST_LOGS'
+    O_GID = 'GID'
+    O_LIST_KEY = 'LIST-KEY'
+    O_STACK_APIS = 'STACK_APIS'
+    O_STACK_SERVICES = 'STACK_SERVICES'
+    O_URI = 'URI'
+    V_LOCAL = ('LOCAL', 'LOCALHOST', '', '127.0.0.1')
 
     def __init__(self, setting):
         self.roles = {}
@@ -230,30 +244,30 @@ class MetaStack(object):
         self.__parser(setting)
 
     def __api(self, device, service, uri):
-        return self.services.get(service).get(cons.O_STACK_URI) % device + uri
+        return self.services.get(service).get(self.O_URI) % device + uri
 
     def __parser(self, setting):
-        self.apis = setting.get(cons.O_STACK_APIS, {})
-        self.headers = setting.get(cons.O_HEADERS, {})
+        self.apis = setting.get(self.O_STACK_APIS, {})
+        self.headers = setting.get(self.O_HEADERS, {})
         self.hosts = {}
-        for n, host in setting.get(cons.O_HOSTS, {}).items():
-            v = copy.deepcopy(setting.get(cons.O_HOST_DEFAULT, {}))
+        for n, host in setting.get(self.O_HOSTS, {}).items():
+            v = copy.deepcopy(setting.get(self.O_HOST_DEFAULT, {}))
             v.update(host)
             self.hosts[n] = v
         if not self.hosts:
             raise ValueError('!!! HOSTS IN SETTING IS EMPTY ')
-        self.logs = setting.get(cons.O_HOST_LOGS, [])
+        self.logs = setting.get(self.O_HOST_LOGS, [])
         self.meta = {}
         for service, apis in self.apis.items():
             for api, attr in apis.items():
-                if cons.O_GID not in attr:
+                if self.O_GID not in attr:
                     continue
-                self.meta[attr.get(cons.O_GID)] = (service, api)
-        self.services = setting.get(cons.O_STACK_SERVICES, {})
+                self.meta[attr.get(self.O_GID)] = (service, api)
+        self.services = setting.get(self.O_STACK_SERVICES, {})
 
     def validate_nodes(self, nodes):
         for node in nodes:
-            if node in cons.V_LOCAL:
+            if node in self.V_LOCAL:
                 continue
             if node not in self.hosts:
                 raise ValueError('invalidate node: %s' % node)
@@ -413,8 +427,7 @@ class MetaStack(object):
             raise KeyError('!!! NODE: %s NOT FOUND IN HOSTS: %s' % (node, self.hosts))
         if service not in self.services:
             raise KeyError('!!! SERVICE: %s NOT FOUND' % service)
-        auth = self.services.get(service).get(cons.O_STACK_AUTH_TYPE)
-        is_session = auth == cons.O_STACK_AUTH_SESSION
+
         device = self.hosts.get(node).get('device')
         methods = {
             'list': 'get',
@@ -425,22 +438,27 @@ class MetaStack(object):
             'delete': 'delete',
         }
 
-        def __request(op, sv, ur, data, header, file):
-            method = methods[op]
+        def __request(op, sv, ur, data, header, other):
+            auth_type = other.get(self.O_AUTH_TYPE)
+            auth_type = self.services.get(service).get(self.O_AUTH_TYPE) if auth_type is None else auth_type
+            is_session = auth_type == self.O_AUTH_SESSION
+            method = methods.get(op)
+            file = other.get('file')
+
             url = self.__api(device, sv, ur)
             data = {} if data is None else data
-            if auth == cons.O_STACK_AUTH_SESSION:
+            if auth_type == self.O_AUTH_SESSION:
                 # request with session for tn
                 url = url if url.endswith('/') else url + '/'
                 data = independence.wraps_data_in_get(data) if method in ('get',) else data
                 session = self.g_session(node, sv)
-            elif auth == cons.O_STACK_AUTH_TOKEN:
+            elif auth_type == self.O_AUTH_TOKEN:
                 # request with token for openstack
                 url = url[:-1] if url.endswith('/') else url
                 if 'X-Auth-Token' not in header:
                     header.update({'X-Auth-Token': self.g_token(node)})
                 session = requests
-            elif auth == cons.O_STACK_AUTH_NONE:
+            elif auth_type == self.O_AUTH_NONE:
                 session = requests
             else:
                 session = requests
@@ -453,7 +471,7 @@ class MetaStack(object):
                         with open(file, 'rb') as f:
                             rsp = session.request(method, url, headers=header, data=f, verify=False)
                     else:
-                        rsp = session.request(method, url, headers=header, timeout=360, **params)
+                        rsp = session.request(method, url, headers=header, verify=False, timeout=360, **params)
                     break
                 except requests.exceptions.ConnectTimeout as e:
                     if ic == 2:
@@ -470,7 +488,7 @@ class MetaStack(object):
 
         def __api(op, s, r):
             # @wrj
-            def ___api(data, header, file=None):
+            def ___api(data, header, other):
                 _id = data.pop('id', None) if data else None
                 _pid = data.pop('pid', None) if data else None
                 _uid = data.pop('uid', None) if data else None
@@ -484,7 +502,7 @@ class MetaStack(object):
                 else:
                     rr = r
 
-                return __request(op, s, rr + _id if _id else rr, data, header, file)
+                return __request(op, s, rr + _id if _id else rr, data, header, other)
 
             return ___api
 
@@ -492,7 +510,7 @@ class MetaStack(object):
             raise KeyError('!!! SERVICE NOT FOUND: %s' % service)
         if resource not in self.apis.get(service):
             raise KeyError('!!! RESOURCE: %s NOT FOUND IN SERVICE: %s' % (resource, service))
-        uri = self.apis.get(service).get(resource).get(cons.O_STACK_URI)
+        uri = self.apis.get(service).get(resource).get(self.O_URI)
         if not uri:
             raise KeyError('!!! RUI NOT FOUND IN SERVICE: %s, RESOURCE: %s' % (service, resource))
         return __api(operate, service, uri)

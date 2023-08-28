@@ -10,7 +10,7 @@ from cons import APP_ENC as APP
 import independence as ind
 
 
-class TsunamiNameSpace(MetaWebSocket):
+class CryptoNameSpace(MetaWebSocket):
 
     def __init__(self, *args, **kwargs):
         MetaWebSocket.__init__(self, *args, **kwargs)
@@ -36,7 +36,7 @@ class TsunamiNameSpace(MetaWebSocket):
                 yfd.print(traceback.format_exc())
 
 
-socket_io.on_namespace(TsunamiNameSpace('/en_decrypt'))
+socket_io.on_namespace(CryptoNameSpace('/en_decrypt'))
 
 bp = Blueprint('en_decrypt', __name__)
 

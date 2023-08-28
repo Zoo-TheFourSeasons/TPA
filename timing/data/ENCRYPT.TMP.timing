@@ -2,6 +2,7 @@ SETTING:
   HOSTS:
     LOCAL: '--ssh_user *** --ssh_psw ***'
   NODES: [LOCAL]
+  SHOWS: [ALL]
   TIMING:
     STATUS: False
     TRIGGER: '--trigger cron --year 2050 --month * --day * --day_of_week * --hour 0 --minute 0 --second 0'
