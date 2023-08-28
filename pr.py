@@ -40,7 +40,7 @@ socket_io = SocketIO(
 @_.route('/webs/<string:f>', defaults={'a': '', 'e': ''}, methods=['get'], endpoint='f')
 @_.route('/webs/<string:a>/<string:f>', methods=['get'], defaults={'e': ''}, endpoint='a')
 @_.route('/webs/<string:a>:<string:e>/<string:f>', methods=['get'], endpoint='e')
-def _(a, e, f):
+def html(a, e, f):
     _bps = [cons.APP_ENC]
     if not a and not f:
         return rt('home.html', **locals())
