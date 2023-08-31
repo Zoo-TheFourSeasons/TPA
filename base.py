@@ -370,15 +370,11 @@ class MetaStack(object):
             data=json.dumps({
                 "auth": {
                     "identity": {
-                        "methods": [
-                            "password"
-                        ],
+                        "methods": ["password"],
                         "password": {
                             "user": {
                                 "name": host.get('name'),
-                                "domain": {
-                                    "name": host.get('domain')
-                                },
+                                "domain": {"name": host.get('domain')},
                                 "password": host.get('password')
                             }
                         }
@@ -575,7 +571,7 @@ class MetaFile(object):
             except Exception as e:
                 raise ValueError('dy error: %s, e: %s' % (t, e))
 
-    def print(self, pt, wt=None, nolog=False):
+    def print(self, pt, wt: dict = None, nolog: bool = False, mix: dict = None):
         if isinstance(pt, (dict, list, tuple)):
             try:
                 pt = json.dumps(pt, default=str, indent=2)
@@ -583,6 +579,10 @@ class MetaFile(object):
                 pt = json.dumps({'error': str(err), 'pt': str(pt)}, indent=2)
         else:
             pt = str(pt)
+        if mix:
+            for k, v in mix.items():
+                if k in pt:
+                    pt = pt.replace(k, v)
         if isinstance(self, MetaWebSocket) and self.afp:
             self.emit('his', data=pt + '\n', room=self.afp)
         if isinstance(self.ns, MetaWebSocket) and self.afp:
@@ -606,6 +606,10 @@ class MetaFile(object):
                     wt = str(wt)
             else:
                 wt = pt
+            if mix:
+                for k, v in mix.items():
+                    if k in wt:
+                        wt = wt.replace(k, v)
         with open(current_his, 'a') as file:
             file.write(wt + '\n')
 
@@ -810,7 +814,7 @@ class MetaFile(object):
                 if suffix:
                     # to fix
                     files = [f for f in files if f.endswith(suffix) or opid(cls.a_dfp(app, opjn(target, f)))]
-                files.sort(reverse=True)
+                files.sort(reverse=False)
                 total = len(files)
                 files = ((app, opjn(target, f)) for f in files)
 
