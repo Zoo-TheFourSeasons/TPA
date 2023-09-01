@@ -222,6 +222,7 @@ class MetaStack(object):
     O_AUTH_TOKEN = 'TOKEN'
     O_AUTH_SESSION = 'SESSION'
     O_AUTH_NONE = 'NONE'
+    O_FILE = 'FILE'
     O_HEADERS = 'HEADERS'
     O_HOSTS = 'HOSTS'
     O_HOST_DEFAULT = 'HOST_DEFAULT'
@@ -439,7 +440,7 @@ class MetaStack(object):
             auth_type = self.services.get(service).get(self.O_AUTH_TYPE) if auth_type is None else auth_type
             is_session = auth_type == self.O_AUTH_SESSION
             method = methods.get(op)
-            file = other.get('file')
+            file = other.get(self.O_FILE)
 
             url = self.__api(device, sv, ur)
             data = {} if data is None else data
@@ -814,7 +815,7 @@ class MetaFile(object):
                 if suffix:
                     # to fix
                     files = [f for f in files if f.endswith(suffix) or opid(cls.a_dfp(app, opjn(target, f)))]
-                files.sort(reverse=False)
+                files.sort(reverse=True)
                 total = len(files)
                 files = ((app, opjn(target, f)) for f in files)
 
