@@ -800,7 +800,7 @@ class MetaFile(object):
                     'app': _app,
                     'afp': afp,
                     'id': afp,
-                    'tpa': [ii for ii in range(10)],
+                    # 'tpa': [ii for ii in range(10)],
                 })
             return r
 
