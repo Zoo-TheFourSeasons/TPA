@@ -22,6 +22,8 @@ import paramiko
 from flask import make_response
 from flask_socketio import Namespace
 from flask_socketio import join_room
+from Cryptodome.PublicKey import RSA
+from Cryptodome.Cipher import PKCS1_v1_5
 
 import ins
 import cons
@@ -221,6 +223,7 @@ class MetaStack(object):
     O_AUTH_TYPE = 'AUTH-TYPE'
     O_AUTH_TOKEN = 'TOKEN'
     O_AUTH_SESSION = 'SESSION'
+    O_AUTH_RSA = 'RSA'
     O_AUTH_NONE = 'NONE'
     O_FILE = 'FILE'
     O_HEADERS = 'HEADERS'
@@ -419,6 +422,30 @@ class MetaStack(object):
             raise e
         return t
 
+    def g_session_rsa(self, node, service):
+        if node not in self.hosts:
+            raise KeyError('!!! NODE: %s NOT FOUND IN HOSTS: %s' % (node, self.hosts))
+        host = self.hosts.get(node)
+        t = requests.Session()
+        try:
+            pubkey = t.get('http://%s:8088/signin' % host.get('device')).json().get('pub_key')
+            print(pubkey)
+            rsa = PKCS1_v1_5.new(RSA.importKey(pubkey))
+            psw = base64.b64encode(rsa.encrypt(host.get('password').encode()))
+            r = t.post('http://%s:8088/signin' % host.get('device'),
+                       json={"username": host.get('name'), "password": psw},
+                       verify=False)
+            if r.status_code != 200:
+                print(r.status_code)
+                print(r.text)
+            else:
+                # print(r.json())
+                pass
+        except Exception as e:
+            print(str(e))
+            raise e
+        return t
+
     def api(self, node, service, operate, resource):
         if node not in self.hosts:
             raise KeyError('!!! NODE: %s NOT FOUND IN HOSTS: %s' % (node, self.hosts))
@@ -455,8 +482,10 @@ class MetaStack(object):
                 if 'X-Auth-Token' not in header:
                     header.update({'X-Auth-Token': self.g_token(node)})
                 session = requests
-            elif auth_type == self.O_AUTH_NONE:
-                session = requests
+            elif auth_type == self.O_AUTH_RSA:
+                url = url[:-1] if url.endswith('/') else url
+                data = independence.wraps_data_in_get(data) if method in ('get',) else data
+                session = self.g_session_rsa(node, sv)
             else:
                 session = requests
 
