@@ -489,7 +489,7 @@ class MetaStack(object):
             else:
                 session = requests
 
-            params = {'params': data} if method in ('get', 'delete') else {'data': json.dumps(data)}
+            params = {'params': data} if method in ('get', ) else {'data': json.dumps(data)}
 
             for ic in range(3):
                 try:
