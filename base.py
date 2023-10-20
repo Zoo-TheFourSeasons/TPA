@@ -332,7 +332,8 @@ class MetaStack(object):
             except Exception as e:
                 raise e
         # self.sshes[node] = ssh
-        return ssh
+        tsp = ssh.get_transport()
+        return ssh, 'windows' in tsp.remote_version.lower()
 
     def get_sftp(self, node):
         if node not in self.hosts:
