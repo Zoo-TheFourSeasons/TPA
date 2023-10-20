@@ -94,6 +94,7 @@ socket_io = SocketIO(
 @app_.route('/login', methods=['get'], defaults={'f': 'login'}, endpoint='login')
 @app_.route('/register', defaults={'f': 'register'}, methods=['get'], endpoint='register')
 @ind.wex
+@ind.c4s(log=True)
 def _(f):
     if cons.APP_USR not in ins.ins_bps:
         return redirect(url_for('home'))
@@ -106,6 +107,7 @@ def _(f):
 @app_.route('/webs/<string:a>:<string:e>/<string:f>', methods=['get'], endpoint='e')
 @ind.wex
 @ind.rtk
+@ind.c4s(log=True)
 def _(a, e, f):
     if a and a not in ins.ins_bps:
         return jf({'status': False, 'message': 'app disabled: %s' % a})
@@ -131,6 +133,7 @@ def _(a, e, f):
 @app_.route('/<string:a>/index', methods=['get'], defaults={'e': ''}, endpoint='index')
 @ind.wex
 @ind.rtk
+@ind.c4s(log=True)
 def _(a, e):
     if a not in ins.ins_bps:
         return jf({'status': False, 'message': 'app disabled: %s' % a})
@@ -155,6 +158,7 @@ def _(a, e):
 @app_.route('/<string:a>/delete', methods=['get'], defaults={'e': ''}, endpoint='delete')
 @ind.wex
 @ind.rtk
+@ind.c4s(log=True)
 def _(a, e):
     if a not in ins.ins_bps:
         return jf({'status': False, 'message': 'app disabled: %s' % a})
@@ -170,6 +174,7 @@ def _(a, e):
 @app_.route('/<string:a>/touch', methods=['get'], defaults={'e': ''}, endpoint='touch')
 @ind.wex
 @ind.rtk
+@ind.c4s(log=True)
 def _(a, e):
     if a not in ins.ins_bps:
         return jf({'status': False, 'message': 'app disabled: %s' % a})
@@ -189,6 +194,7 @@ def _(a, e):
 @app_.route('/<string:a>/mkdir', methods=['get'], defaults={'e': ''}, endpoint='mkdir')
 @ind.wex
 @ind.rtk
+@ind.c4s(log=True)
 def _(a, e):
     if a not in ins.ins_bps:
         return jf({'status': False, 'message': 'app disabled: %s' % a})
@@ -203,6 +209,7 @@ def _(a, e):
 @app_.route('/<string:a>/view', methods=['get'], defaults={'e': ''}, endpoint='view')
 @ind.wex
 @ind.rtk
+@ind.c4s(log=True)
 def _(a, e):
     if a not in ins.ins_bps:
         return jf({'status': False, 'message': 'app disabled: %s' % a})
@@ -215,6 +222,7 @@ def _(a, e):
 @app_.route('/<string:a>/download', methods=['get'], defaults={'e': ''}, endpoint='dd')
 @ind.wex
 @ind.rtk
+@ind.c4s(log=True)
 def _(a, e):
     if a not in ins.ins_bps:
         return jf({'status': False, 'message': 'app disabled: %s' % a})
@@ -226,6 +234,7 @@ def _(a, e):
 @app_.route('/restart', methods=['get'], endpoint='restart')
 @ind.wex
 @ind.rtk
+@ind.c4s(log=True)
 def _():
     _bps = [bp for bp in cons.Apps.apps.keys() if r.args.get(bp, 'false').lower() == 'true']
     print('restart:', _bps)

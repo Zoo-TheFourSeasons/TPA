@@ -2,14 +2,22 @@
 import traceback
 import json
 import time
+import sys
+import logging
+from datetime import datetime
 from functools import wraps
 from types import FunctionType
-import logging
 
 from flask import request, make_response, redirect, url_for, jsonify
 
 import cons
 import ins
+
+
+_warning_cost = 3.14
+_logs = {
+    # 'common': logging.getLogger('common'),
+}
 
 
 def timer(func):
@@ -118,33 +126,14 @@ def vda(a):
         raise ValueError('app disabled: %s' % a)
 
 
-logs = {
-    'profile-platform': logging.getLogger('profile-platform'),
-    'profile-gb28181': logging.getLogger('profile-gb28181'),
-    'common': logging.getLogger('common'),
-}
+def g_log(name):
+    if name not in _logs:
+        _logs[name] = logging.getLogger(name)
+    return _logs[name]
 
 
-def cost2print(func):
-    f_back = sys._getframe().f_back
-    num = f_back.f_lineno
-    fn = f_back.f_code.co_filename
-
-    @wraps(func)
-    def wrap(*args, **kwargs):
-        def _wrap():
-            ts = time.time()
-            now = datetime.now()
-            rsp = func(*args, **kwargs)
-            print('%s %s %s:%s:%s' % (now, round(time.time() - ts, 5), fn, num, func))
-            return rsp
-
-        return _wrap()
-
-    return wrap
-
-
-def cost2log(fd='profile-platform', threshold=0.25):
+def c4s(fd='common', threshold=0, echo=True, log=True):
+    # cost4statistic
 
     def wrapper(func):
         fb = sys._getframe().f_back
@@ -159,37 +148,17 @@ def cost2log(fd='profile-platform', threshold=0.25):
                 try:
                     rsp = func(*args, **kwargs)
                 except Exception as e:
-                    logs.get(fd).error(traceback.format_exc())
-                    rsp = {'e': str(e)}
-                cost = round(time.time() - ts, 2)
-                if threshold and cost >= threshold:
-                    level = logging.WARNING if cost >= 3.14 else logging.INFO
-                    logs.get(fd).log(level, '%s %s %s:%s:%s' % (now, cost, fn, num, func))
-                return rsp
-
-            return _wrap()
-
-        return wrap
-
-    return wrapper
-
-
-def try2log(fd='common'):
-
-    def wrapper(func):
-        fb = sys._getframe().f_back
-        fn = fb.f_code.co_filename
-        num = fb.f_lineno
-
-        @wraps(func)
-        def wrap(*args, **kwargs):
-            def _wrap():
-                logs.get(fd).info('in: %s %s' % (fn, num))
-                try:
-                    rsp = func(*args, **kwargs)
-                except Exception as e:
-                    logs.get(fd).error('error: %s, traceback: %s' % (e, traceback.format_exc()))
+                    g_log('common').error(traceback.format_exc())
                     raise e
+                cost = round(time.time() - ts, 2)
+                if echo:
+                    print('%s %s %s:%s:%s' % (now, cost, fn, num, func))
+                if log:
+                    if threshold and cost >= threshold:
+                        level = logging.WARNING if cost >= _warning_cost else logging.INFO
+                        g_log(fd).log(level, '%s %s %s:%s:%s' % (now, cost, fn, num, func))
+                    else:
+                        g_log(fd).info('%s %s %s:%s:%s' % (now, cost, fn, num, func))
                 return rsp
 
             return _wrap()
