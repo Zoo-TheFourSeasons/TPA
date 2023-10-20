@@ -117,4 +117,85 @@ def vda(a):
         raise ValueError('app disabled: %s' % a)
 
 
+logs = {
+    'profile-platform': logging.getLogger('profile-platform'),
+    'profile-gb28181': logging.getLogger('profile-gb28181'),
+    'common': logging.getLogger('common'),
+}
+
+
+def cost2print(func):
+    f_back = sys._getframe().f_back
+    num = f_back.f_lineno
+    fn = f_back.f_code.co_filename
+
+    @wraps(func)
+    def wrap(*args, **kwargs):
+        def _wrap():
+            ts = time.time()
+            now = datetime.now()
+            rsp = func(*args, **kwargs)
+            print('%s %s %s:%s:%s' % (now, round(time.time() - ts, 5), fn, num, func))
+            return rsp
+
+        return _wrap()
+
+    return wrap
+
+
+def cost2log(fd='profile-platform', threshold=0.25):
+
+    def wrapper(func):
+        fb = sys._getframe().f_back
+        fn = fb.f_code.co_filename
+        num = fb.f_lineno
+
+        @wraps(func)
+        def wrap(*args, **kwargs):
+            def _wrap():
+                ts = time.time()
+                now = str(datetime.now())[:22]
+                try:
+                    rsp = func(*args, **kwargs)
+                except Exception as e:
+                    logs.get(fd).error(traceback.format_exc())
+                    rsp = {'e': str(e)}
+                cost = round(time.time() - ts, 2)
+                if threshold and cost >= threshold:
+                    level = logging.WARNING if cost >= 3.14 else logging.INFO
+                    logs.get(fd).log(level, '%s %s %s:%s:%s' % (now, cost, fn, num, func))
+                return rsp
+
+            return _wrap()
+
+        return wrap
+
+    return wrapper
+
+
+def try2log(fd='common'):
+
+    def wrapper(func):
+        fb = sys._getframe().f_back
+        fn = fb.f_code.co_filename
+        num = fb.f_lineno
+
+        @wraps(func)
+        def wrap(*args, **kwargs):
+            def _wrap():
+                logs.get(fd).info('in: %s %s' % (fn, num))
+                try:
+                    rsp = func(*args, **kwargs)
+                except Exception as e:
+                    logs.get(fd).error('error: %s, traceback: %s' % (e, traceback.format_exc()))
+                    raise e
+                return rsp
+
+            return _wrap()
+
+        return wrap
+
+    return wrapper
+
+
 TimerMeta = decorate_meta(timer)
