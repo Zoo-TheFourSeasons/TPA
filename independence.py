@@ -4,6 +4,7 @@ import json
 import time
 from functools import wraps
 from types import FunctionType
+import logging
 
 from flask import request, make_response, redirect, url_for, jsonify
 
