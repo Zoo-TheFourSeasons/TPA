@@ -7,6 +7,7 @@ import logging
 from datetime import datetime
 from functools import wraps
 from types import FunctionType
+from logging.handlers import RotatingFileHandler
 
 from flask import request, make_response, redirect, url_for, jsonify
 
@@ -128,7 +129,12 @@ def vda(a):
 
 def g_log(name):
     if name not in _logs:
-        _logs[name] = logging.getLogger(name)
+        logger = logging.getLogger(name)
+        logger.setLevel('INFO')
+        handler = logging.FileHandler(name + '.log', encoding='UTF-8')
+        handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(filename)s %(funcName)s %(lineno)s %(message)s'))
+        logger.addHandler(handler)
+        _logs[name] = logger
     return _logs[name]
 
 
@@ -156,9 +162,9 @@ def c4s(fd='common', threshold=0, echo=True, log=True):
                 if log:
                     if threshold and cost >= threshold:
                         level = logging.WARNING if cost >= _warning_cost else logging.INFO
-                        g_log(fd).log(level, '%s %s %s:%s:%s' % (now, cost, fn, num, func))
+                        g_log(fd).log(level, '%s %s:%s %s' % (cost, fn, num, func))
                     else:
-                        g_log(fd).info('%s %s %s:%s:%s' % (now, cost, fn, num, func))
+                        g_log(fd).info('%s %s:%s %s' % (cost, fn, num, func))
                 return rsp
 
             return _wrap()
