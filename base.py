@@ -26,15 +26,15 @@ import ins
 import cons
 import independence
 
-opjn = os.path.join
-opid = os.path.isdir
-opif = os.path.isfile
-opdn = os.path.dirname
-opsp = os.path.split
-opex = os.path.exists
-opap = os.path.abspath
+ojn = os.path.join
+oid = os.path.isdir
+oif = os.path.isfile
+odn = os.path.dirname
+osp = os.path.split
+oex = os.path.exists
+oap = os.path.abspath
 
-PATH_PROJECT = opdn(opap(__file__))
+PATH_PROJECT = odn(oap(__file__))
 logging.getLogger('paramiko.transport').setLevel(logging.CRITICAL)
 
 
@@ -258,7 +258,7 @@ class MetaFile(object):
 
     @staticmethod
     def ly(t):
-        if not opex(t):
+        if not oex(t):
             raise FileNotFoundError('ly error, file not exist: %s' % t)
         with open(t, 'r', encoding='utf-8') as f:
             try:
@@ -411,8 +411,8 @@ class MetaFile(object):
         # app = 'star'
         # target = 'STARS.sta'
         ap = cls.a_ddp(app)
-        fp = opjn(ap, target)
-        if not opap(fp).startswith(ap):
+        fp = ojn(ap, target)
+        if not oap(fp).startswith(ap):
             raise ValueError('unknown target: %s' % target)
         # fp = '/home/zin/Desktop/_Y/TPA/star/data/STARS.sta'
         return fp
@@ -430,9 +430,9 @@ class MetaFile(object):
         if a not in cons.Apps.apps:
             raise ValueError('unknown app: %s' % a)
         if a in (cons.APP_ENC, cons.APP_ZOO):
-            return opdn(PATH_PROJECT)
-        dp = opjn(opjn(PATH_PROJECT, a), 'data')
-        dp = dp if not e else opjn(dp, e)
+            return odn(PATH_PROJECT)
+        dp = ojn(ojn(PATH_PROJECT, a), 'data')
+        dp = dp if not e else ojn(dp, e)
         # dp = '/home/zin/Desktop/_Y/TPA/timing/data'
         return dp
 
@@ -446,7 +446,7 @@ class MetaFile(object):
     def a_hdp(cls, a: str):
         # a: app:edp or edp
         edp = a.split(':')[1] if ':' in a else a
-        return opjn(cls.a_ddp(cons.APP_HIS), edp)
+        return ojn(cls.a_ddp(cons.APP_HIS), edp)
 
     @classmethod
     @independence.timer
@@ -454,7 +454,7 @@ class MetaFile(object):
         print('dd', app, target)
 
         v = cls.a_dfp(app, target)
-        _, fn = opsp(v)
+        _, fn = osp(v)
         lw = target.lower()
         # txt
         fnd = '%s.%s.txt' % (fn, cls.tsp(ed=17))
@@ -493,10 +493,10 @@ class MetaFile(object):
                 mtime = stat.st_mtime
                 size = os.path.getsize(_fp) / 1024.0
                 size = str(round(size / 1024.0, 1)) + 'M' if size > 2048 else str(round(size, 1)) + 'K'
-                _, fn = opsp(_fp)
+                _, fn = osp(_fp)
                 r.append({
                     'fn': fn,
-                    'isdir': opid(_fp),
+                    'isdir': oid(_fp),
                     'ctime': time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(ctime)),
                     'mtime': time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(mtime)),
                     'size': size,
@@ -513,14 +513,14 @@ class MetaFile(object):
         else:
             fp = cls.a_dfp(app, target)
             files, total = [], 0
-            if opex(fp) and opid(fp):
+            if oex(fp) and oid(fp):
                 files = [f for f in os.listdir(fp) if not f.startswith('.')]
                 if suffix:
                     # to fix
-                    files = [f for f in files if f.endswith(suffix) or opid(cls.a_dfp(app, opjn(target, f)))]
+                    files = [f for f in files if f.endswith(suffix) or oid(cls.a_dfp(app, ojn(target, f)))]
                 files.sort(reverse=True)
                 total = len(files)
-                files = ((app, opjn(target, f)) for f in files)
+                files = ((app, ojn(target, f)) for f in files)
 
         rows = do(files)
         # parents of the current path
@@ -534,12 +534,12 @@ class MetaFile(object):
     def vw(cls, app: str, target: str, args_r: dict = None) -> dict:
         print('vw', app, target)
         v = cls.a_dfp(app, target)
-        if not opex(v):
+        if not oex(v):
             return {'status': False, 'message': 'there is not exist: %s' % target, 'type': 'txt'}
-        if not opif(v):
+        if not oif(v):
             return {'status': False, 'message': 'is not a file: %s' % target, 'type': 'txt'}
 
-        fd, fn = opsp(target)
+        fd, fn = osp(target)
         lw = fn.lower()
         target = '/'.join((app, target))
         target_split = target.split('/')
@@ -574,7 +574,7 @@ class MetaFile(object):
         for fn in files.split(','):
             fp = cls.a_dfp(app, fn)
             try:
-                if opid(fp):
+                if oid(fp):
                     shutil.rmtree(fp)
                 else:
                     os.remove(fp)
@@ -603,7 +603,7 @@ class MetaFile(object):
 
         for fn in files.split(','):
             fp = cls.a_dfp(app, fn)
-            if opid(fp):
+            if oid(fp):
                 continue
             try:
                 if fp.endswith('sh'):
@@ -648,8 +648,8 @@ class MetaFile(object):
                 #         for r, ds, _ in os.walk(cls.a_ddp(a)):
                 #             for d in ds:
                 #                 if _d.lower() in d.lower():
-                #                     print(a, opjn(r, d))
-                return ((a, opjn(r, d)) for a in apps for _d in v for r, ds, _ in os.walk(cls.a_ddp(a)) for d in ds if _d.lower() in d.lower())
+                #                     print(a, ojn(r, d))
+                return ((a, ojn(r, d)) for a in apps for _d in v for r, ds, _ in os.walk(cls.a_ddp(a)) for d in ds if _d.lower() in d.lower())
             return ((a, cls.a_ddp(a)) for a in apps)
 
         def fs_f(fts, ads, ft='f'):
@@ -662,10 +662,10 @@ class MetaFile(object):
                 #         for r, _, fs in os.walk(d):
                 #             for f in fs:
                 #                 if _f.lower() in f.lower():
-                #                     print(a, opjn(r, f).replace(cls.a_ddp(a), '')[1:])
-                return ((a, opjn(r, f).replace(cls.a_ddp(a), '')[1:]) for a, d in ads for _f in v for r, _, fs in os.walk(d) for f in fs if _f.lower() in f.lower())
+                #                     print(a, ojn(r, f).replace(cls.a_ddp(a), '')[1:])
+                return ((a, ojn(r, f).replace(cls.a_ddp(a), '')[1:]) for a, d in ads for _f in v for r, _, fs in os.walk(d) for f in fs if _f.lower() in f.lower())
             else:
-                return ((a, opjn(r, f).replace(cls.a_ddp(a), '')[1:]) for a, d in ads for r, _, fs in os.walk(d) for f in fs)
+                return ((a, ojn(r, f).replace(cls.a_ddp(a), '')[1:]) for a, d in ads for r, _, fs in os.walk(d) for f in fs)
 
         def fs_suffix(fts, afs, ft='s'):
             if ft in fts and fts[ft]:
@@ -713,7 +713,7 @@ class MetaFile(object):
     def mdr(cls, app: str, target: str) -> dict:
         print('mdr', app, target)
         t = cls.a_dfp(app, target)
-        if opex(t):
+        if oex(t):
             return {'status': False, 'message': 'there is exist: %s' % target}
         try:
             os.makedirs(t)
@@ -729,12 +729,12 @@ class MetaFile(object):
         if ':' in target:
             return {'status': False, 'message': 'target can not contain ":"'}
         t = cls.a_dfp(app, target)
-        _dir = opdn(t)
-        if not opex(_dir):
+        _dir = odn(t)
+        if not oex(_dir):
             os.makedirs(_dir)
 
         try:
-            if opex(t):
+            if oex(t):
                 os.rename(t, '.'.join((t, cls.tsp(st=2, ed=-2), 'spa')))
             with open(t, 'w') as f:
                 f.write(text)
@@ -767,19 +767,19 @@ class MetaFile(object):
     def get_output_file(cls, path_output: str, tid: str) -> str:
         folder = cls.tsp(ed=10)
 
-        path_folder = opjn(path_output, folder)
-        if not opex(path_folder):
+        path_folder = ojn(path_output, folder)
+        if not oex(path_folder):
             os.makedirs(path_folder)
         print('path_folder: %s, tid: %s' % (path_folder, tid))
 
-        path_file = opjn(path_folder, tid + '.history')
-        if not opex(path_file):
+        path_file = ojn(path_folder, tid + '.history')
+        if not oex(path_file):
             print('get a new file: ', path_file)
         return path_file
 
     @staticmethod
     def mkdir_if_not_exist(path: str) -> None:
-        if opex(path) and opid(path):
+        if oex(path) and oid(path):
             return
         print('makedirs: %s' % path)
         os.makedirs(path)
@@ -804,7 +804,7 @@ class MetaFile(object):
                     continue
                 if ends and not [f for end in ends if f.endswith(end)]:
                     continue
-                cls.func_fp(opjn(r, f), func, args, kwargs)
+                cls.func_fp(ojn(r, f), func, args, kwargs)
 
     @classmethod
     def func_dir(cls, path: str, func,
@@ -818,7 +818,7 @@ class MetaFile(object):
                     continue
                 if ends and not [f for end in ends if f.endswith(end)]:
                     continue
-                cls.func_fp(opjn(r, f), func, args, kwargs)
+                cls.func_fp(ojn(r, f), func, args, kwargs)
 
     @classmethod
     def ana(cls, path, sf='.py', th=3, le=8) -> None:
@@ -853,7 +853,7 @@ class MetaFile(object):
                 print(str(i).zfill(3), k)
             return d
 
-        if opif(path):
+        if oif(path):
             do(path)
         else:
             cls.func_file(path, do)
