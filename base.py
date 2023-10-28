@@ -242,19 +242,54 @@ class MetaFile(object):
         if not self.event:
             return
 
-        status = self.event
         if isinstance(self.ns, MetaWebSocket):
-            self.ns.progress({'status': status, 'at': self.afp}, self.afp)
+            self.ns.progress(self, self.afp)
 
-        if status == self.E_EXECUTE:
-            return
-        elif status == self.E_STOP:
+        def ee():
+            self.status = self.E_EXECUTE
+
+        def pp():
+            raise ValueError('PAUSING')
+
+        def sp():
+            raise ValueError('NOT RUNNING')
+
+        def ss():
+            raise ValueError('NOT RUNNING')
+
+        def ep():
+            self.status = self.E_PAUSE
+            while self.event == self.status == self.E_PAUSE:
+                time.sleep(1.2345)
+                if isinstance(self.ns, MetaWebSocket):
+                    self.ns.progress(self, self.afp)
+
+        def pe():
+            self.status = self.E_EXECUTE
+
+        def s():
+            self.status = self.E_STOP
             ins.ins_tasks.pop(self.afp, None)
             raise EOFError('STOP BY EVENT')
-        while status == self.E_PAUSE:
-            time.sleep(1.2345)
-            if isinstance(self.ns, MetaWebSocket):
-                self.ns.progress({'status': status, 'at': self.afp}, self.afp)
+
+        def e():
+            self.status = self.E_EXECUTE
+
+        status_event_map = {
+            # execute:(execute, pause, stop)
+            ':'.join((self.E_EXECUTE, self.E_EXECUTE,)): ee,
+            ':'.join((self.E_EXECUTE, self.E_PAUSE,)): ep,
+            ':'.join((self.E_EXECUTE, self.E_STOP,)): s,
+            # pause:(execute, pause, stop)
+            ':'.join((self.E_PAUSE, self.E_EXECUTE,)): pe,
+            ':'.join((self.E_PAUSE, self.E_PAUSE,)): pp,
+            ':'.join((self.E_PAUSE, self.E_STOP,)): s,
+            # stop:(execute, pause, stop)
+            ':'.join((self.E_STOP, self.E_EXECUTE,)): e,
+            ':'.join((self.E_STOP, self.E_PAUSE,)): sp,
+            ':'.join((self.E_STOP, self.E_STOP,)): ss,
+        }
+        status_event_map[':'.join((self.status, self.event))]()
 
     @staticmethod
     def ly(t):
@@ -294,7 +329,7 @@ class MetaFile(object):
         print(pt)
         current_his = None if 'current_his' not in self.__dict__ else self.current_his
         if not current_his:
-            print('WARNING: THERE IS NOT CURRENT_HIS')
+            # print('WARNING: THERE IS NOT CURRENT_HIS')
             return
 
         if nolog:
@@ -1283,33 +1318,50 @@ class MetaWebSocket(Namespace, MetaFile):
         afp = data.get('at')
         join_room(afp)
         if afp in ins.ins_tasks:
-            status = ins.ins_tasks.get(afp).status
-            if status in (self.E_EXECUTE, self.E_PAUSE):
-                self.progress({'status': status, 'at': afp}, afp)
+            afp = ins.ins_tasks.get(self.afp)
+            self.progress(afp, self.afp)
 
-    def progress(self, data, room):
-        self.emit('progress', data=data, room=room)
+    def progress(self, afp, room):
+        if afp:
+            self.emit('progress', data={'status': afp.status, 'at': room}, room=room)
+            # self.print('STATUS: %s, AFP: %s' % (afp.status, id(afp)))
+
+    def api_stop(self, _):
+        if self.afp in ins.ins_tasks and ins.ins_tasks.get(self.afp).status in (self.E_EXECUTE, self.E_PAUSE,):
+            afp = ins.ins_tasks.get(self.afp)
+            self.progress(afp, self.afp)
+        else:
+            return
+
+    def api_pause(self, _):
+        if self.afp not in ins.ins_tasks:
+            self.print('WARNING: %s IS NOT RUNNING' % self.afp)
+            return
+        afp = ins.ins_tasks.get(self.afp)
+        if afp.status == self.E_PAUSE:
+            afp.event = self.E_EXECUTE
+        elif afp.status == self.E_EXECUTE:
+            afp.event = self.E_PAUSE
+        else:
+            self.print('WARNING: %s IS NOT RUNNING' % self.afp)
+        self.progress(afp, self.afp)
 
     def on_task(self, data):
         action = data.get('action')
         event = action.split(':')[-1].upper()
 
         self.afp = data.get('at')
-        if self.afp in ins.ins_tasks:
-            status = ins.ins_tasks.get(self.afp).status
-            if event == self.E_EXECUTE and status in (self.E_EXECUTE,):
-                self.print('WARNING: %s IS RUNNING' % self.afp)
-                return
-            if event in (self.E_STOP, self.E_PAUSE) and status in (self.E_STOP,):
-                self.print('WARNING: %s IS NOT RUNNING' % self.afp)
-                return
 
         def do(d):
             ts1 = time.perf_counter()
             ts2 = time.time()
 
-            if event == self.E_EXECUTE:
-                self.print('START: %s\n' % datetime.datetime.now())
+            # execute check
+            if event in (self.E_EXECUTE, ):
+                if self.afp in ins.ins_tasks and ins.ins_tasks.get(self.afp).status in (self.E_EXECUTE, self.E_PAUSE,):
+                    self.print('WARNING: %s IS RUNNING' % self.afp)
+                    return
+                self.print('START: %s' % datetime.datetime.now())
             try:
                 self.actions[d.get('action')](d)
             except EOFError as _:
@@ -1317,12 +1369,13 @@ class MetaWebSocket(Namespace, MetaFile):
             except Exception as e:
                 self.print('ERROR: %s' % repr(e))
                 self.print('TRACE: %s' % traceback.format_exc())
-            if event == self.E_EXECUTE:
+
+            if event in (self.E_EXECUTE, ):
                 self.print('')
                 self.print('END: %s' % datetime.datetime.now())
                 self.print('COST: %s, %s ' % (round(time.perf_counter() - ts1, 5),
                                               round(time.time() - ts2, 5)))
-            self.progress({'status': self.E_STOP, 'at': self.afp}, self.afp)
+                self.progress(self, self.afp)
 
         self.socketio.start_background_task(do, data)
 
