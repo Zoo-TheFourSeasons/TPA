@@ -48,12 +48,12 @@
             $('.stop').attr('disabled', false);
             $('.execute').attr('disabled', true);
         } else if (status === 'PAUSE') {
-            $('.pause').attr('disabled', false);
+            $('.pause').attr('disabled', true);
             $('.stop').attr('disabled', false);
-            $('.execute').attr('disabled', true);
+            $('.execute').attr('disabled', false);
         } else if (status === 'STOP') {
-            $('.pause').attr('disabled', false);
-            $('.stop').attr('disabled', false);
+            $('.pause').attr('disabled', true);
+            $('.stop').attr('disabled', true);
             $('.execute').attr('disabled', false);
         }
     }
@@ -695,7 +695,7 @@
                 let params_ctx = Model.json('viewer_md');
                 params.params = {'target': at, 'ctx': params_ctx.text}
             }
-            $('#his pre').empty();
+            {#$('#his pre').empty();#}
             $('.execute').attr('disabled', true);
             join_room()
             app_io.emit('task', params);

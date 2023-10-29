@@ -14,13 +14,15 @@ class CryptoNameSpace(MetaWebSocket):
 
     def __init__(self, *args, **kwargs):
         MetaWebSocket.__init__(self, *args, **kwargs)
-        self.actions = {
+        self.apis = {
             'en_decrypt:execute': self.api_execute,
         }
+        self.events = {
+            'EXECUTE': self.execute
+        }
 
-    def api_execute(self, data):
+    def execute(self, data):
         print('api_execute', data)
-        # at = data.get('at')
         params = data.get('params')
         aes = params.get('psw_aes')
         stream = params.get('psw_stream')
