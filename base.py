@@ -217,21 +217,13 @@ class MetaDummyProcess(Process):
 
 
 class MetaFile(object):
-    E_EXECUTE = 'EXECUTE'
-    E_RESUME = 'RESUME'
-    E_PAUSE = 'PAUSE'
-    E_STOP = 'STOP'
 
-    # E_ALL = (E_EXECUTE, E_PAUSE, E_STOP)
-
-    def __init__(self):
+    def __init__(self, ns=None, afp=None):
         self.debug = False
-        self.afp = None
-        self.ns = None
+        self.ns = ns
+        self.afp = afp
         self.task_id = None
         self.current_his = None
-        self.event = None
-        self.status = self.E_STOP
 
     @staticmethod
     def ly(t):
@@ -1238,34 +1230,53 @@ class MetaFile(object):
             'CURRENT_HISTORY': self.sf_current_history,
         }
 
+
+class MetaController(object):
+    E_EXECUTE = 'EXECUTE'
+    E_RESUME = 'RESUME'
+    E_PAUSE = 'PAUSE'
+    E_STOP = 'STOP'
+
+    def __init__(self, ns=None, afp=None):
+        self.ns = ns
+        self.afp = afp
+        self.mc_status = self.E_EXECUTE
+        self.mc_event = self.E_EXECUTE
+        if afp is None:
+            raise ValueError('AFP IS NONE')
+        ins.ins_tasks[afp] = self
+
     def is_executing(self):
-        return self.status in (self.E_EXECUTE,)
+        return self.mc_status in (self.E_EXECUTE,)
 
     def is_paused(self):
-        return self.status in (self.E_PAUSE, )
+        return self.mc_status in (self.E_PAUSE, )
 
     def is_stopped(self):
-        return self.status in (self.E_STOP, )
+        return self.mc_status in (self.E_STOP, )
 
-    def a_execute(self):
-        self.event = self.E_EXECUTE
+    def start(self):
+        self.action(event=self.E_EXECUTE)
 
-    def a_resume(self):
-        self.event = self.E_RESUME
+    def resume(self):
+        self.action(event=self.E_RESUME)
 
-    def a_pause(self):
-        self.event = self.E_PAUSE
+    def pause(self):
+        self.action(event=self.E_PAUSE)
 
-    def a_stop(self):
-        self.event = self.E_STOP
+    def stop(self):
+        self.action(event=self.E_STOP)
 
-    def action(self):
-        if not self.event:
+    def action(self, event=None):
+        if event:
+            self.mc_event = event
+
+        if not self.mc_event:
             return
 
         def ep():
-            self.status = self.E_PAUSE
-            while self.event == self.status == self.E_PAUSE:
+            self.mc_status = self.E_PAUSE
+            while self.mc_event == self.mc_status == self.E_PAUSE:
                 if isinstance(self.ns, MetaWebSocket):
                     self.ns.progress(self, self.afp)
                 time.sleep(0.5)
@@ -1274,17 +1285,17 @@ class MetaFile(object):
             ep()
 
         def pr():
-            self.status = self.E_RESUME
+            self.mc_status = self.E_RESUME
 
         def s():
-            self.status = self.E_STOP
+            self.mc_status = self.E_STOP
             if isinstance(self.ns, MetaWebSocket):
                 self.ns.progress(self, self.afp)
             ins.ins_tasks.pop(self.afp, None)
             raise EOFError('STOP BY EVENT')
 
         def e():
-            self.status = self.E_EXECUTE
+            self.mc_status = self.E_EXECUTE
 
         status_event_map = {
             # valid
@@ -1296,22 +1307,18 @@ class MetaFile(object):
             ':'.join((self.E_PAUSE, self.E_STOP,)): s,
             ':'.join((self.E_STOP, self.E_EXECUTE,)): e,
         }
-        status_event = ':'.join((self.status, self.event))
+        status_event = ':'.join((self.mc_status, self.mc_event))
         # invalid
         if status_event not in status_event_map:
-            self.event = None
+            self.mc_event = None
             if isinstance(self.ns, MetaWebSocket):
                 self.ns.progress(self, self.afp)
-            raise ValueError('INVALID')
+            raise ValueError('INVALID: %s' % status_event)
         # valid
         status_event_map[status_event]()
         if isinstance(self.ns, MetaWebSocket):
             self.ns.progress(self, self.afp)
-        self.event = None
-
-
-class MetaTask(object):
-    pass
+        self.mc_event = None
 
 
 class MetaWebSocket(Namespace, MetaFile):
@@ -1335,60 +1342,65 @@ class MetaWebSocket(Namespace, MetaFile):
         self.print('join: %s' % data)
         afp = data.get('at')
         join_room(afp)
-        if afp in ins.ins_tasks:
-            afp = ins.ins_tasks.get(self.afp)
-            self.progress(afp, self.afp)
+        inst = ins.ins_tasks.get(afp)
+        if inst:
+            self.progress(inst, afp)
 
-    def progress(self, afp, room):
-        if afp:
-            self.emit('progress', data={'status': afp.status, 'at': room}, room=room)
-            # self.print('AFP(id %s) %s %s -> %s' % (id(afp), afp.afp, afp.status, afp.event))
+    def progress(self, inst, room):
+        if inst:
+            self.emit('progress', data={'status': inst.mc_status, 'at': room}, room=room)
+            # self.print('AFP(id %s) %s %s -> %s' % (id(afp), afp.afp, afp.mc_status, afp.mc_event))
 
-    def api_stop(self, _):
-        if self.afp in ins.ins_tasks:
-            afp = ins.ins_tasks.get(self.afp)
-            if afp:
-                if afp and afp.is_paused() or afp.is_executing():
-                    self.print('STOP AFP(%s, %s)' % (id(afp), afp.afp))
-                    afp.a_stop()
-                    ins.ins_tasks.pop(self.afp, None)
-                    return
-        self.print('WARNING: AFP(%s) IS NOT RUNNING' % self.afp)
+    def api_stop(self, data):
+        afp = data.get('at')
+        inst = ins.ins_tasks.get(afp)
 
-    def api_resume(self, _):
-        if self.afp in ins.ins_tasks:
-            afp = ins.ins_tasks.get(self.afp)
-            if afp and afp.is_paused():
-                self.print('RESUME AFP(%s, %s)' % (id(afp), afp.afp))
-                afp.a_resume()
+        if inst:
+            if inst.is_paused() or inst.is_executing():
+                self.print('STOP AFP(%s, %s)' % (id(inst), afp))
+                inst.stop()
                 return
-        self.print('WARNING: AFP(%s) IS NOT RUNNING' % self.afp)
+        self.print('WARNING: AFP(%s) IS NOT RUNNING' % afp)
 
-    def api_pause(self, _):
-        if self.afp in ins.ins_tasks:
-            afp = ins.ins_tasks.get(self.afp)
-            if afp and afp.is_executing():
-                self.print('PAUSE AFP(%s, %s)' % (id(afp), afp.afp))
-                afp.a_pause()
-                return
-        self.print('WARNING: AFP(%s) IS NOT RUNNING' % self.afp)
+    def api_resume(self, data):
+        afp = data.get('at')
+        inst = ins.ins_tasks.get(afp)
+
+        if inst and inst.is_paused():
+            self.print('RESUME AFP(%s, %s)' % (id(inst), afp))
+            inst.resume()
+            return
+        self.print('WARNING: AFP(%s) IS NOT RUNNING' % afp)
+
+    def api_pause(self, data):
+        afp = data.get('at')
+        inst = ins.ins_tasks.get(afp)
+
+        if inst and inst.is_executing():
+            self.print('PAUSE AFP(%s, %s)' % (id(inst), afp))
+            inst.pause()
+            return
+        self.print('WARNING: AFP(%s) IS NOT RUNNING' % afp)
 
     def api_execute(self, data):
-        if self.afp in ins.ins_tasks:
-            afp = ins.ins_tasks.get(self.afp)
+        afp = data.get('at')
+        inst = ins.ins_tasks.get(afp)
+
+        if inst:
             # executing
-            if afp and afp.is_executing():
-                self.print('WARNING: AFP(%s, %s) IS RUNNING' % (id(afp), afp.afp))
+            if inst.is_executing():
+                self.print('WARNING: AFP(%s, %s) IS RUNNING' % (id(inst), afp))
                 return
             # paused
-            elif afp and afp.is_paused():
-                self.print('RESUME AFP(%s, %s)' % (id(afp), afp.afp))
-                afp.a_execute()
+            elif inst.is_paused():
+                self.print('RESUME AFP(%s, %s)' % (id(inst), afp))
+                inst.start()
                 return
             # stopped
             return
 
-        self.print('EXECUTE: %s' % datetime.datetime.now())
+        self.afp = afp
+        self.print('EXECUTE: %s, %s' % (datetime.datetime.now(), afp))
 
         ts1 = time.perf_counter()
         ts2 = time.time()
@@ -1403,19 +1415,19 @@ class MetaWebSocket(Namespace, MetaFile):
             self.print('ERROR: %s' % repr(e))
             self.print('TRACE: %s' % traceback.format_exc())
         finally:
-            afp = ins.ins_tasks.get(self.afp)
-            if afp:
-                afp.a_stop()
+            inst = ins.ins_tasks.get(afp)
+            # if inst:
+            #     inst.stop()
 
-        self.print('STOP: %s' % datetime.datetime.now())
+        self.print('STOP: %s, %s' % (datetime.datetime.now(), afp))
         self.print('TOTAL COST: %s, %s ' % (round(time.perf_counter() - ts1, 5),
                                             round(time.time() - ts2, 5)))
-        self.progress(self, self.afp)
+        self.progress(inst, afp)
+        inst.stop()
 
     def on_task(self, data):
-        action = data.get('action')
-        self.afp = data.get('at')
-        self.socketio.start_background_task(self.apis.get(action), data)
+        api = self.apis.get(data.get('action'))
+        self.socketio.start_background_task(api, data)
 
 
 if __name__ == '__main__':
