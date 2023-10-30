@@ -218,6 +218,7 @@ class MetaDummyProcess(Process):
 
 class MetaFile(object):
     E_EXECUTE = 'EXECUTE'
+    E_RESUME = 'RESUME'
     E_PAUSE = 'PAUSE'
     E_STOP = 'STOP'
 
@@ -1249,6 +1250,9 @@ class MetaFile(object):
     def a_execute(self):
         self.event = self.E_EXECUTE
 
+    def a_resume(self):
+        self.event = self.E_RESUME
+
     def a_pause(self):
         self.event = self.E_PAUSE
 
@@ -1257,20 +1261,7 @@ class MetaFile(object):
 
     def action(self):
         if not self.event:
-            # print(id(self), self.afp, self.event)
             return
-
-        def ee():
-            raise ValueError('RUNNING')
-
-        def pp():
-            raise ValueError('PAUSING')
-
-        def sp():
-            raise ValueError('NOT RUNNING')
-
-        def ss():
-            raise ValueError('NOT RUNNING')
 
         def ep():
             self.status = self.E_PAUSE
@@ -1278,6 +1269,12 @@ class MetaFile(object):
                 if isinstance(self.ns, MetaWebSocket):
                     self.ns.progress(self, self.afp)
                 time.sleep(0.5)
+
+        def rp():
+            ep()
+
+        def pr():
+            self.status = self.E_RESUME
 
         def s():
             self.status = self.E_STOP
@@ -1290,20 +1287,24 @@ class MetaFile(object):
             self.status = self.E_EXECUTE
 
         status_event_map = {
-            # execute:(execute, pause, stop)
-            ':'.join((self.E_EXECUTE, self.E_EXECUTE,)): ee,
+            # valid
             ':'.join((self.E_EXECUTE, self.E_PAUSE,)): ep,
             ':'.join((self.E_EXECUTE, self.E_STOP,)): s,
-            # pause:(execute, pause, stop)
-            ':'.join((self.E_PAUSE, self.E_EXECUTE,)): e,
-            ':'.join((self.E_PAUSE, self.E_PAUSE,)): pp,
+            ':'.join((self.E_RESUME, self.E_PAUSE,)): rp,
+            ':'.join((self.E_RESUME, self.E_STOP,)): s,
+            ':'.join((self.E_PAUSE, self.E_RESUME,)): pr,
             ':'.join((self.E_PAUSE, self.E_STOP,)): s,
-            # stop:(execute, pause, stop)
             ':'.join((self.E_STOP, self.E_EXECUTE,)): e,
-            ':'.join((self.E_STOP, self.E_PAUSE,)): sp,
-            ':'.join((self.E_STOP, self.E_STOP,)): ss,
         }
-        status_event_map[':'.join((self.status, self.event))]()
+        status_event = ':'.join((self.status, self.event))
+        # invalid
+        if status_event not in status_event_map:
+            self.event = None
+            if isinstance(self.ns, MetaWebSocket):
+                self.ns.progress(self, self.afp)
+            raise ValueError('INVALID')
+        # valid
+        status_event_map[status_event]()
         if isinstance(self.ns, MetaWebSocket):
             self.ns.progress(self, self.afp)
         self.event = None
@@ -1348,18 +1349,27 @@ class MetaWebSocket(Namespace, MetaFile):
             afp = ins.ins_tasks.get(self.afp)
             if afp:
                 if afp and afp.is_paused() or afp.is_executing():
-                    afp.a_stop()
                     self.print('STOP AFP(%s, %s)' % (id(afp), afp.afp))
+                    afp.a_stop()
                     ins.ins_tasks.pop(self.afp, None)
                     return
+        self.print('WARNING: AFP(%s) IS NOT RUNNING' % self.afp)
+
+    def api_resume(self, _):
+        if self.afp in ins.ins_tasks:
+            afp = ins.ins_tasks.get(self.afp)
+            if afp and afp.is_paused():
+                self.print('RESUME AFP(%s, %s)' % (id(afp), afp.afp))
+                afp.a_resume()
+                return
         self.print('WARNING: AFP(%s) IS NOT RUNNING' % self.afp)
 
     def api_pause(self, _):
         if self.afp in ins.ins_tasks:
             afp = ins.ins_tasks.get(self.afp)
             if afp and afp.is_executing():
-                afp.a_pause()
                 self.print('PAUSE AFP(%s, %s)' % (id(afp), afp.afp))
+                afp.a_pause()
                 return
         self.print('WARNING: AFP(%s) IS NOT RUNNING' % self.afp)
 
@@ -1372,8 +1382,8 @@ class MetaWebSocket(Namespace, MetaFile):
                 return
             # paused
             elif afp and afp.is_paused():
-                afp.a_execute()
                 self.print('RESUME AFP(%s, %s)' % (id(afp), afp.afp))
+                afp.a_execute()
                 return
             # stopped
             return
@@ -1398,8 +1408,8 @@ class MetaWebSocket(Namespace, MetaFile):
                 afp.a_stop()
 
         self.print('STOP: %s' % datetime.datetime.now())
-        self.print('COST: %s, %s ' % (round(time.perf_counter() - ts1, 5),
-                                      round(time.time() - ts2, 5)))
+        self.print('TOTAL COST: %s, %s ' % (round(time.perf_counter() - ts1, 5),
+                                            round(time.time() - ts2, 5)))
         self.progress(self, self.afp)
 
     def on_task(self, data):

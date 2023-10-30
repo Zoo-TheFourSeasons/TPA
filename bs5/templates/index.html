@@ -44,17 +44,25 @@
         let btns = data.btns;
         let status = data.status;
         if (status === 'EXECUTE') {
+            $('.execute').attr('disabled', true);
+            $('.resume').attr('disabled', true);
             $('.pause').attr('disabled', false);
             $('.stop').attr('disabled', false);
-            $('.execute').attr('disabled', true);
         } else if (status === 'PAUSE') {
+            $('.execute').attr('disabled', true);
+            $('.resume').attr('disabled', false);
             $('.pause').attr('disabled', true);
             $('.stop').attr('disabled', false);
-            $('.execute').attr('disabled', false);
+        } else if (status === 'RESUME') {
+            $('.execute').attr('disabled', true);
+            $('.resume').attr('disabled', true);
+            $('.pause').attr('disabled', false);
+            $('.stop').attr('disabled', false);
         } else if (status === 'STOP') {
+            $('.execute').attr('disabled', false);
+            $('.resume').attr('disabled', true);
             $('.pause').attr('disabled', true);
             $('.stop').attr('disabled', true);
-            $('.execute').attr('disabled', false);
         }
     }
 
@@ -300,6 +308,7 @@
                 <button id="exe" class="btn execute"><i class="fas fa-fw fa-play"></i></button>
                 <button id="exe_ctx" class="btn execute"><i class="fas fa-fw fa-arrow-up-short-wide"></i>
                 </button>
+                <button class="btn resume"><i class="fas fa-fw fa-play-circle"></i></button>
                 <button class="btn pause"><i class="fas fa-fw fa-pause"></i></button>
                 <button class="btn stop"><i class="fas fa-fw fa-stop"></i></button>
                 <button class="btn clean"><i class="fa-solid fa-fw fa-recycle"></i></button>
@@ -695,7 +704,7 @@
                 let params_ctx = Model.json('viewer_md');
                 params.params = {'target': at, 'ctx': params_ctx.text}
             }
-            {#$('#his pre').empty();#}
+            $('#his pre').empty();
             $('.execute').attr('disabled', true);
             join_room()
             app_io.emit('task', params);
@@ -711,6 +720,19 @@
                 'params': {'target': at}
             };
             $('.stop').attr('disabled', true);
+            join_room()
+            app_io.emit('task', params);
+        });
+
+        {# resume #}
+        $bd.on('click', '.resume', function () {
+            console.log(this.id);
+            let params = {
+                'at': at,
+                'action': app + ':' + 'resume',
+                'echo': false,
+                'params': {'target': at}
+            };
             join_room()
             app_io.emit('task', params);
         });
