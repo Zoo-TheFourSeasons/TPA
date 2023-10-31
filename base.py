@@ -1240,7 +1240,7 @@ class MetaController(object):
     def __init__(self, ns=None, afp=None):
         self.ns = ns
         self.afp = afp
-        self.mc_status = self.E_EXECUTE
+        self.mc_status = self.E_STOP
         self.mc_event = self.E_EXECUTE
         if afp is None:
             raise ValueError('AFP IS NONE')
