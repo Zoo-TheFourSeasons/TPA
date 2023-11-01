@@ -1241,13 +1241,22 @@ class MetaController(object):
         self.ns = ns
         self.afp = afp
         self.mc_status = self.E_STOP
-        self.mc_event = self.E_EXECUTE
-        if afp is None:
+        self.mc_event = None
+        self.init()
+        self.start()
+
+    def init(self):
+        if self.afp is None:
             raise ValueError('AFP IS NONE')
-        ins.ins_tasks[afp] = self
+        ins.ins_tasks[self.afp] = self
+        # if isinstance(self.ns, MetaWebSocket):
+        #     self.ns.progress(self, self.afp)
+
+    def uninit(self):
+        ins.ins_tasks.pop(self.afp, None)
 
     def is_executing(self):
-        return self.mc_status in (self.E_EXECUTE,)
+        return self.mc_status in (self.E_EXECUTE, self.E_RESUME,)
 
     def is_paused(self):
         return self.mc_status in (self.E_PAUSE, )
@@ -1291,7 +1300,7 @@ class MetaController(object):
             self.mc_status = self.E_STOP
             if isinstance(self.ns, MetaWebSocket):
                 self.ns.progress(self, self.afp)
-            ins.ins_tasks.pop(self.afp, None)
+            self.uninit()
             raise EOFError('STOP BY EVENT')
 
         def e():
@@ -1313,7 +1322,7 @@ class MetaController(object):
             self.mc_event = None
             if isinstance(self.ns, MetaWebSocket):
                 self.ns.progress(self, self.afp)
-            raise ValueError('INVALID: %s' % status_event)
+            return
         # valid
         status_event_map[status_event]()
         if isinstance(self.ns, MetaWebSocket):
@@ -1343,13 +1352,13 @@ class MetaWebSocket(Namespace, MetaFile):
         afp = data.get('at')
         join_room(afp)
         inst = ins.ins_tasks.get(afp)
-        if inst:
+        if inst and not inst.is_stopped():
             self.progress(inst, afp)
 
     def progress(self, inst, room):
         if inst:
             self.emit('progress', data={'status': inst.mc_status, 'at': room}, room=room)
-            # self.print('AFP(id %s) %s %s -> %s' % (id(afp), afp.afp, afp.mc_status, afp.mc_event))
+            # self.print('AFP(id %s) %s %s -> %s' % (id(inst), inst.afp, inst.mc_status, inst.mc_event))
 
     def api_stop(self, data):
         afp = data.get('at')
@@ -1386,22 +1395,21 @@ class MetaWebSocket(Namespace, MetaFile):
         afp = data.get('at')
         inst = ins.ins_tasks.get(afp)
 
-        if inst:
-            # executing
-            if inst.is_executing():
-                self.print('WARNING: AFP(%s, %s) IS RUNNING' % (id(inst), afp))
-                return
-            # paused
-            elif inst.is_paused():
-                self.print('RESUME AFP(%s, %s)' % (id(inst), afp))
-                inst.start()
-                return
-            # stopped
+        # executing
+        if inst and inst.is_executing():
+            self.print('WARNING: AFP(%s, %s) IS RUNNING' % (id(inst), afp))
             return
+        # paused
+        elif inst and inst.is_paused():
+            self.print('WARNING: AFP(%s, %s) IS PAUSED' % (id(inst), afp))
+            return
+        # stopped
+        elif inst:
+            inst.uninit()
 
+        # self.afp is required for self.print
         self.afp = afp
-        self.print('EXECUTE: %s, %s' % (datetime.datetime.now(), afp))
-
+        self.print('EXECUTE: %s, %s' % (afp, datetime.datetime.now()))
         ts1 = time.perf_counter()
         ts2 = time.time()
 
@@ -1414,15 +1422,11 @@ class MetaWebSocket(Namespace, MetaFile):
         except Exception as e:
             self.print('ERROR: %s' % repr(e))
             self.print('TRACE: %s' % traceback.format_exc())
-        finally:
-            inst = ins.ins_tasks.get(afp)
-            # if inst:
-            #     inst.stop()
 
-        self.print('STOP: %s, %s' % (datetime.datetime.now(), afp))
-        self.print('TOTAL COST: %s, %s ' % (round(time.perf_counter() - ts1, 5),
-                                            round(time.time() - ts2, 5)))
-        self.progress(inst, afp)
+        self.print('STOP: %s, %s' % (afp, datetime.datetime.now()))
+        self.print('TOTAL COST: %s, %s' % (round(time.perf_counter() - ts1, 5),
+                                           round(time.time() - ts2, 5)))
+        inst = ins.ins_tasks.get(afp)
         inst.stop()
 
     def on_task(self, data):
