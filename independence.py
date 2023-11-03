@@ -160,7 +160,7 @@ def c4s(fd='common', threshold=0, echo=True, log=True):
                 if echo:
                     print('%s %s %s:%s:%s' % (now, cost, fn, num, func))
                 if log:
-                    if threshold and cost >= threshold:
+                    if threshold is not None and cost >= threshold:
                         level = logging.WARNING if cost >= _warning_cost else logging.INFO
                         g_log(fd).log(level, '%s %s:%s %s' % (cost, fn, num, func))
                     else:
