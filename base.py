@@ -18,9 +18,7 @@ from multiprocessing.dummy import Process
 
 import requests
 import yaml
-from flask import make_response
-from flask_socketio import Namespace
-from flask_socketio import join_room
+from flask_socketio import Namespace, join_room
 
 import ins
 import cons
@@ -137,14 +135,6 @@ def data_paging_for_pickle(request, _ins, key_name, exclude=None, fields=None):
         temp.update({key_name: item, 'id': item})
         rows.append(temp)
     return total, rows
-
-
-def make_response_with_headers(data):
-    r = make_response(data)
-    r.headers['Server'] = 'TPA'
-    r.headers['Connection'] = 'Keep-Alive'
-    r.headers['Access-Control-Allow-Credentials'] = 'true'
-    return r
 
 
 # def fix_service_providers_in_neutron_conf(func):
@@ -290,11 +280,15 @@ class MetaFile(object):
     def __request_parser_args(args_r):
         if not args_r:
             return None, None, None, None, None
-        search = args_r['search'] if 'search' in args_r and args_r['search'] else None
-        sort = args_r['sort'] if 'sort' in args_r and args_r['sort'] else None
-        order = args_r['order'] if 'order' in args_r and args_r['order'] else None
-        offset = int(args_r['offset']) if 'offset' in args_r and args_r['offset'] else None
-        limit = int(args_r['limit']) if 'limit' in args_r and args_r['limit'] else None
+        args = {}
+        # fix
+        for k, v in args_r.items():
+            args[k] = v[0] if isinstance(v, list) else v
+        search = args['search'] if 'search' in args and args['search'] else None
+        sort = args['sort'] if 'sort' in args and args['sort'] else None
+        order = args['order'] if 'order' in args and args['order'] else None
+        offset = int(args['offset']) if 'offset' in args and args['offset'] else None
+        limit = int(args['limit']) if 'limit' in args and args['limit'] else None
         return search, sort, order, offset, limit
 
     @classmethod
@@ -434,13 +428,15 @@ class MetaFile(object):
                 break
         with open(v, 'rb') as f:
             ctx = f.read()
-        response = make_response(ctx)
-        response.headers['Content-Type'] = 'application/octet-stream'
 
         # for CN
         from urllib.parse import quote
 
-        response.headers['Content-Disposition'] = "attachment; filename*=utf-8''%s" % (quote(fnd))
+        response = independence.make_response_with_headers(ctx, {
+            'Content-Type': 'application/octet-stream',
+            'Content-Disposition': "attachment; filename*=utf-8''%s" % (quote(fnd))
+        })
+
         return response
 
     @classmethod

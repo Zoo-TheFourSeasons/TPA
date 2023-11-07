@@ -7,7 +7,6 @@ import logging
 from datetime import datetime
 from functools import wraps
 from types import FunctionType
-from logging.handlers import RotatingFileHandler
 
 from flask import request, make_response, redirect, url_for, jsonify
 
@@ -19,6 +18,13 @@ _warning_cost = 3.14
 _logs = {
     # 'common': logging.getLogger('common'),
 }
+
+
+def make_response_with_headers(data, headers: dict):
+    r = make_response(data)
+    for k, v in headers.items():
+        r.headers[k] = v
+    return r
 
 
 def timer(func):
