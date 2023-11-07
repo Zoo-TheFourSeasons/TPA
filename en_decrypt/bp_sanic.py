@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import traceback
 
-from sanic import Blueprint, request
-from sanic import json as jsonify
+from sanic import Blueprint
+from sanic.response import json as jsonify
 
 from en_decrypt.assistant import EncryptHelper as Helper
 from app import socket_io
@@ -41,12 +41,12 @@ class CryptoNameSpace(MetaWebSocket):
 
 socket_io.on_namespace(CryptoNameSpace('/en_decrypt'))
 
-bp = Blueprint('en_decrypt', __name__)
+bp = Blueprint(APP)
 
 
-@bp.route('/en_decrypt/', methods=['get'], endpoint='en_decrypt')
+@bp.get('/en_decrypt', name='en_decrypt')
 @ind.wex
-def en_decrypt():
+async def _(request):
     psw_aes = request.args.get('psw_aes')
     psw_stream = request.args.get('psw_stream')
     nonce = request.args.get('nonce')
@@ -55,9 +55,9 @@ def en_decrypt():
     return jsonify({'status': True})
 
 
-@bp.route('/en_decrypt/separate', methods=['get'], endpoint='separate')
+@bp.get('/en_decrypt/separate', name='separate')
 @ind.wex
-def separate():
+async def _(request):
     _type = request.args.get('type')
     target = request.args.get('target')
     max_size = request.args.get('max_size')

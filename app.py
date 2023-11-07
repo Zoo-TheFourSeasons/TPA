@@ -7,7 +7,7 @@ from apscheduler import events
 from flask import Flask
 from flask_socketio import SocketIO
 from flask_apscheduler import APScheduler
-from flask import jsonify as jf
+from flask import jsonify
 from flask import render_template as rt
 from flask import request as r
 from flask import redirect, url_for
@@ -110,7 +110,7 @@ def _(f):
 @ind.c4s(log=True)
 def _(a, e, f):
     if a and a not in ins.ins_bps:
-        return jf({'status': False, 'message': 'app disabled: %s' % a})
+        return jsonify({'status': False, 'message': 'app disabled: %s' % a})
 
     _bps = ins.ins_bps
     if not a and not e:
@@ -136,7 +136,7 @@ def _(a, e, f):
 @ind.c4s(log=True)
 def _(a, e):
     if a not in ins.ins_bps:
-        return jf({'status': False, 'message': 'app disabled: %s' % a})
+        return jsonify({'status': False, 'message': 'app disabled: %s' % a})
 
     t = r.args.get('target', '')
     if a in (cons.APP_ZOO, cons.APP_SEC, cons.APP_ENC) or e == cons.EDP_DF:
@@ -151,7 +151,7 @@ def _(a, e):
         f = Ass.ldr
     else:
         f = MetaFile.ldr
-    return jf(f(':'.join((a, e)) if e else a, t, r.args, suffix))
+    return jsonify(f(':'.join((a, e)) if e else a, t, r.args, suffix))
 
 
 @app_.route('/<string:a>:<string:e>/delete', methods=['get'], endpoint='e_delete')
@@ -161,13 +161,13 @@ def _(a, e):
 @ind.c4s(log=True)
 def _(a, e):
     if a not in ins.ins_bps:
-        return jf({'status': False, 'message': 'app disabled: %s' % a})
+        return jsonify({'status': False, 'message': 'app disabled: %s' % a})
     if a == cons.APP_TIM:
         from timing.assistant import TimingHelper as Ass
         f = Ass.remove
     else:
         f = MetaFile.de
-    return jf(f(':'.join((a, e)) if e else a, r.args.get('target')))
+    return jsonify(f(':'.join((a, e)) if e else a, r.args.get('target')))
 
 
 @app_.route('/<string:a>:<string:e>/touch', methods=['get'], endpoint='e_touch')
@@ -177,7 +177,7 @@ def _(a, e):
 @ind.c4s(log=True)
 def _(a, e):
     if a not in ins.ins_bps:
-        return jf({'status': False, 'message': 'app disabled: %s' % a})
+        return jsonify({'status': False, 'message': 'app disabled: %s' % a})
 
     t = r.args.get('target')
     if a == cons.APP_TIM:
@@ -187,7 +187,7 @@ def _(a, e):
         f = MetaFile.th
 
     text = r.args.get('text')
-    return jf(f(text, ':'.join((a, e)) if e else a, t))
+    return jsonify(f(text, ':'.join((a, e)) if e else a, t))
 
 
 @app_.route('/<string:a>:<string:e>/mkdir', methods=['get'], endpoint='e_mkdir')
@@ -197,12 +197,12 @@ def _(a, e):
 @ind.c4s(log=True)
 def _(a, e):
     if a not in ins.ins_bps:
-        return jf({'status': False, 'message': 'app disabled: %s' % a})
+        return jsonify({'status': False, 'message': 'app disabled: %s' % a})
 
     t = r.args.get('target')
     if '&' in t or ',' in t:
-        return jf({'status': False, 'message': 'target can not contain special char: &,'})
-    return jf(MetaFile.mdr(':'.join((a, e)) if e else a, t))
+        return jsonify({'status': False, 'message': 'target can not contain special char: &,'})
+    return jsonify(MetaFile.mdr(':'.join((a, e)) if e else a, t))
 
 
 @app_.route('/<string:a>:<string:e>/view', methods=['get'], endpoint='e_view')
@@ -212,10 +212,10 @@ def _(a, e):
 @ind.c4s(log=True)
 def _(a, e):
     if a not in ins.ins_bps:
-        return jf({'status': False, 'message': 'app disabled: %s' % a})
+        return jsonify({'status': False, 'message': 'app disabled: %s' % a})
 
     t = r.args.get('target')
-    return jf(MetaFile.vw(':'.join((a, e)) if e else a, t, r.args))
+    return jsonify(MetaFile.vw(':'.join((a, e)) if e else a, t, r.args))
 
 
 @app_.route('/<string:a>:<string:e>/download', methods=['get'], endpoint='e_dd')
@@ -225,7 +225,7 @@ def _(a, e):
 @ind.c4s(log=True)
 def _(a, e):
     if a not in ins.ins_bps:
-        return jf({'status': False, 'message': 'app disabled: %s' % a})
+        return jsonify({'status': False, 'message': 'app disabled: %s' % a})
 
     t = r.args.get('target')
     return MetaFile.dd(':'.join((a, e)) if e else a, t)
@@ -239,4 +239,4 @@ def _():
     _bps = [bp for bp in cons.Apps.apps.keys() if r.args.get(bp, 'false').lower() == 'true']
     print('restart:', _bps)
     ins.ins_que.put(_bps)
-    return jf({'status': True, 'message': ', '.join(_bps)})
+    return jsonify({'status': True, 'message': ', '.join(_bps)})

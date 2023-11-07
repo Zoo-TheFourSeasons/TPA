@@ -9,13 +9,10 @@ from datetime import datetime
 from functools import wraps
 from types import FunctionType
 
-# from flask import make_response, url_for
-# from sanic import request
-# from sanic import redirect
-from sanic import json as jsonify
+from sanic import html
+from sanic.response import json as jsonify
 from jinja2 import Environment, FileSystemLoader
 
-# import cons
 import ins
 
 
@@ -30,7 +27,7 @@ _jin_env = Environment(loader=FileSystemLoader(_templates), autoescape=True)
 
 
 def rt(tpn, **context):
-    return _jin_env.get_template().render(context)
+    return html(_jin_env.get_template(tpn).render(context))
 
 
 def timer(func):

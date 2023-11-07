@@ -1,5 +1,5 @@
-# from multiprocessing.dummy import Queue
-from multiprocessing import Queue
+from multiprocessing.dummy import Queue
+# from multiprocessing import Queue
 
 ins_xls_cache = {}
 

@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
-from sanic import Blueprint, request
-from sanic import json as jsonify
+from sanic import Blueprint
+from sanic.response import json as jsonify
 
 from timing.assistant import TimingHelper as Ass
 from cons import APP_TIM as APP
 import independence_sanic as ind
 
-bp = Blueprint(APP, __name__)
+bp = Blueprint(APP)
 
 
-@bp.route('/timing/update', methods=['get'], endpoint='touch')
+@bp.get('/timing/update', name='update')
 @ind.wex
 @ind.rtk
-def update():
+async def _(request):
     ind.vda(APP)
 
     text = request.args.get('text')
@@ -20,12 +20,28 @@ def update():
     return jsonify(Ass.update(text, APP, target))
 
 
-@bp.route('/timing/execute', methods=['get'], defaults={'func': Ass.execute, 'status': None}, endpoint='execute')
-@bp.route('/timing/off', methods=['get'], defaults={'func': Ass.status, 'status': False}, endpoint='off')
-@bp.route('/timing/on', methods=['get'], defaults={'func': Ass.status, 'status': True}, endpoint='on')
+@bp.get('/timing/execute', name='execute')
 @ind.wex
 @ind.rtk
-def execute(func, status):
+async def _(request):
     ind.vda(APP)
 
-    return jsonify(func(APP, request.args.get('target'), status))
+    return jsonify(Ass.execute(APP, request.args.get('target'), None))
+
+
+@bp.get('/timing/off', name='off')
+@ind.wex
+@ind.rtk
+async def _(request):
+    ind.vda(APP)
+
+    return jsonify(Ass.status(APP, request.args.get('target'), False))
+
+
+@bp.get('/timing/on', name='on')
+@ind.wex
+@ind.rtk
+async def _(request):
+    ind.vda(APP)
+
+    return jsonify(Ass.status(APP, request.args.get('target'), True))
