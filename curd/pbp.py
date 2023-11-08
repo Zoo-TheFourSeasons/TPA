@@ -11,7 +11,6 @@ import independence_sanic as ind
 import cons
 import ins
 
-
 bp = Blueprint('curd')
 
 
@@ -41,7 +40,7 @@ async def _(request):
     return ind.rt('register.html', **{'_bps': ins.ins_bps})
 
 
-@bp.get('/webs/<ae:str>/index', name='page')
+@bp.get('/webs/<ae>/index', name='page')
 @ind.c4s(log=True)
 async def _(request, ae):
     a, e = ae.split(':') if ':' in ae else (ae, '')
@@ -63,7 +62,7 @@ async def _(request, ae):
     return ind.rt('%s/%s/index.html' % (a, e), **locals())
 
 
-@bp.get('/<ae:str>/index', name='index')
+@bp.get('/<ae>/index', name='index')
 @ind.c4s(log=True)
 async def _(request, ae):
     a, e = ae.split(':') if ':' in ae else (ae, '')
@@ -86,7 +85,7 @@ async def _(request, ae):
     return jsonify(f(':'.join((a, e)) if e else a, t, request.args, suffix))
 
 
-@bp.get('/<ae:str>/delete', name='delete')
+@bp.get('/<ae>/delete', name='delete')
 @ind.c4s(log=True)
 async def _(request, ae):
     a, e = ae.split(':') if ':' in ae else (ae, '')
@@ -100,7 +99,7 @@ async def _(request, ae):
     return jsonify(f(':'.join((a, e)) if e else a, request.args.get('target')))
 
 
-@bp.get('/<ae:str>/touch', name='touch')
+@bp.get('/<ae>/touch', name='touch')
 @ind.c4s(log=True)
 async def _(request, ae):
     a, e = ae.split(':') if ':' in ae else (ae, '')
@@ -118,7 +117,7 @@ async def _(request, ae):
     return jsonify(f(text, ':'.join((a, e)) if e else a, t))
 
 
-@bp.get('/<ae:str>/mkdir', name='mkdir')
+@bp.get('/<ae>/mkdir', name='mkdir')
 @ind.c4s(log=True)
 async def _(request, ae):
     a, e = ae.split(':') if ':' in ae else (ae, '')
@@ -131,7 +130,7 @@ async def _(request, ae):
     return jsonify(MetaFile.mdr(':'.join((a, e)) if e else a, t))
 
 
-@bp.get('/<ae:str>/view', name='view')
+@bp.get('/<ae>/view', name='view')
 @ind.c4s(log=True)
 async def _(request, ae):
     a, e = ae.split(':') if ':' in ae else (ae, '')
@@ -142,7 +141,7 @@ async def _(request, ae):
     return jsonify(MetaFile.vw(':'.join((a, e)) if e else a, t, request.args))
 
 
-@bp.get('/<ae:str>/download', name='download')
+@bp.get('/<ae>/download', name='download')
 @ind.c4s(log=True)
 async def _(request, ae):
     a, e = ae.split(':') if ':' in ae else (ae, '')
