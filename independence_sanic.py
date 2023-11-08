@@ -11,15 +11,12 @@ from types import FunctionType
 
 from sanic import html
 from sanic.response import json as jsonify
+from sanic.log import error_logger
 from jinja2 import Environment, FileSystemLoader
-
 import ins
 
 
 _warning_cost = 3.14
-_logs = {
-    # 'common': logging.getLogger('common'),
-}
 _project = os.path.dirname(os.path.abspath(__file__))
 _bs5 = os.path.join(_project, 'bs5')
 _templates = os.path.join(_bs5, 'templates')
@@ -136,18 +133,7 @@ def vda(a):
         raise ValueError('app disabled: %s' % a)
 
 
-def g_log(name):
-    if name not in _logs:
-        logger = logging.getLogger(name)
-        logger.setLevel('INFO')
-        handler = logging.FileHandler(name + '.log', encoding='UTF-8')
-        handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(filename)s %(funcName)s %(lineno)s %(message)s'))
-        logger.addHandler(handler)
-        _logs[name] = logger
-    return _logs[name]
-
-
-def c4s(fd='common', threshold=0, echo=True, log=True):
+def c4s(fd='profile', threshold=0, echo=False, log=True):
     # cost4statistic
 
     def wrapper(func):
@@ -163,7 +149,7 @@ def c4s(fd='common', threshold=0, echo=True, log=True):
                 try:
                     rsp = func(*args, **kwargs)
                 except Exception as e:
-                    g_log('common').error(traceback.format_exc())
+                    error_logger.error(traceback.format_exc())
                     raise e
                 cost = round(time.time() - ts, 2)
                 if echo:
@@ -171,9 +157,9 @@ def c4s(fd='common', threshold=0, echo=True, log=True):
                 if log:
                     if threshold is not None and cost >= threshold:
                         level = logging.WARNING if cost >= _warning_cost else logging.INFO
-                        g_log(fd).log(level, '%s %s:%s %s' % (cost, fn, num, func))
+                        logging.getLogger(fd).log(level, '%s %s:%s %s' % (cost, fn, num, func))
                     else:
-                        g_log(fd).info('%s %s:%s %s' % (cost, fn, num, func))
+                        logging.getLogger(fd).info('%s %s:%s %s' % (cost, fn, num, func))
                 return rsp
 
             return _wrap()

@@ -1,13 +1,11 @@
 # coding=utf-8
-import importlib
-from app_sanic import app
+from sc_app import app
 import cons
 import ins
+from curd.sc_bp import bp as bp_curd
 
 ins.ins_bps = list(cons.Apps.apps.keys())
-bps_ins = (importlib.import_module(b + '.bp_sanic') for b in ins.ins_bps)
-
-[app.blueprint(i.bp) for i in bps_ins]
+app.blueprint(bp_curd)
 
 if __name__ == '__main__':
-    app.run('0.0.0.0', port=80, debug=True, access_log=True, workers=1)
+    app.run('0.0.0.0', port=80, access_log=True, workers=4)

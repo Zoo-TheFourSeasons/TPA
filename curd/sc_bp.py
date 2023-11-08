@@ -1,23 +1,22 @@
 # -*- coding: utf-8 -*-
-"""app
-"""
 import os
 
-from sanic import Sanic
-from sanic import json as jsonify
 from sanic import redirect
+from sanic import Blueprint
+from sanic.response import json as jsonify
 
-import independence_sanic as ind
-import ins
-import cons
 from base import MetaFile
+from sc_app import app
+import independence_sanic as ind
+import cons
+import ins
 
 
-app = Sanic(__name__)
-app.static('/static', 'bs5/static')
+bp = Blueprint('curd')
 
 
-@app.get('/', name='home')
+@bp.get('/', name='home')
+@ind.c4s(log=True)
 async def _(request):
     _bps = ins.ins_bps
     a = request.args.get('app', '')
@@ -26,21 +25,24 @@ async def _(request):
     return ind.rt('home.html', **locals())
 
 
-@app.get('/login', name='login')
+@bp.get('/login', name='login')
+@ind.c4s(log=True)
 async def _(request):
     if cons.APP_USR not in ins.ins_bps:
         return redirect(app.url_for('home'))
     return ind.rt('login.html', **{'_bps': ins.ins_bps})
 
 
-@app.get('/register', name='register')
+@bp.get('/register', name='register')
+@ind.c4s(log=True)
 async def _(request):
     if cons.APP_USR not in ins.ins_bps:
         return redirect(app.url_for('home'))
     return ind.rt('register.html', **{'_bps': ins.ins_bps})
 
 
-@app.get('/webs/<ae:str>/index', name='page')
+@bp.get('/webs/<ae:str>/index', name='page')
+@ind.c4s(log=True)
 async def _(request, ae):
     a, e = ae.split(':') if ':' in ae else (ae, '')
 
@@ -61,7 +63,8 @@ async def _(request, ae):
     return ind.rt('%s/%s/index.html' % (a, e), **locals())
 
 
-@app.get('/<ae:str>/index', name='index')
+@bp.get('/<ae:str>/index', name='index')
+@ind.c4s(log=True)
 async def _(request, ae):
     a, e = ae.split(':') if ':' in ae else (ae, '')
     if a not in ins.ins_bps:
@@ -83,7 +86,8 @@ async def _(request, ae):
     return jsonify(f(':'.join((a, e)) if e else a, t, request.args, suffix))
 
 
-@app.get('/<ae:str>/delete', name='delete')
+@bp.get('/<ae:str>/delete', name='delete')
+@ind.c4s(log=True)
 async def _(request, ae):
     a, e = ae.split(':') if ':' in ae else (ae, '')
     if a not in ins.ins_bps:
@@ -96,7 +100,8 @@ async def _(request, ae):
     return jsonify(f(':'.join((a, e)) if e else a, request.args.get('target')))
 
 
-@app.get('/<ae:str>/touch', name='touch')
+@bp.get('/<ae:str>/touch', name='touch')
+@ind.c4s(log=True)
 async def _(request, ae):
     a, e = ae.split(':') if ':' in ae else (ae, '')
     if a not in ins.ins_bps:
@@ -113,7 +118,8 @@ async def _(request, ae):
     return jsonify(f(text, ':'.join((a, e)) if e else a, t))
 
 
-@app.get('/<ae:str>/mkdir', name='mkdir')
+@bp.get('/<ae:str>/mkdir', name='mkdir')
+@ind.c4s(log=True)
 async def _(request, ae):
     a, e = ae.split(':') if ':' in ae else (ae, '')
     if a not in ins.ins_bps:
@@ -125,7 +131,8 @@ async def _(request, ae):
     return jsonify(MetaFile.mdr(':'.join((a, e)) if e else a, t))
 
 
-@app.get('/<ae:str>/view', name='view')
+@bp.get('/<ae:str>/view', name='view')
+@ind.c4s(log=True)
 async def _(request, ae):
     a, e = ae.split(':') if ':' in ae else (ae, '')
     if a not in ins.ins_bps:
@@ -135,7 +142,8 @@ async def _(request, ae):
     return jsonify(MetaFile.vw(':'.join((a, e)) if e else a, t, request.args))
 
 
-@app.get('/<ae:str>/download', name='download')
+@bp.get('/<ae:str>/download', name='download')
+@ind.c4s(log=True)
 async def _(request, ae):
     a, e = ae.split(':') if ':' in ae else (ae, '')
     if a not in ins.ins_bps:

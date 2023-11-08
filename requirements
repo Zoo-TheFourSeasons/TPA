@@ -20,3 +20,5 @@ pandas
 numpy
 akshare
 exifread
+sanic
+sanic-ext
