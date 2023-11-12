@@ -23,6 +23,7 @@ from flask_socketio import Namespace, join_room
 import ins
 import cons
 import independence
+from sc_app import sio
 
 ojn = os.path.join
 oid = os.path.isdir
@@ -1428,6 +1429,157 @@ class MetaWebSocket(Namespace, MetaFile):
     def on_task(self, data):
         api = self.apis.get(data.get('action'))
         self.socketio.start_background_task(api, data)
+
+
+class MetaSocketIO(MetaFile):
+
+    def __init__(self, *args, **kwargs):
+        MetaFile.__init__(self)
+        Namespace.__init__(self, *args, **kwargs)
+        self.apis = {}
+        self.events = {}
+
+    def is_execute(self, afp):
+        pass
+
+    def on_connect(self):
+        return True
+
+    def on_disconnect(self):
+        pass
+
+    def on_join(self, data):
+        self.print('join: %s' % data)
+        afp = data.get('at')
+        join_room(afp)
+        inst = ins.ins_tasks.get(afp)
+        if inst and not inst.is_stopped():
+            self.progress(inst, afp)
+
+    def progress(self, inst, room):
+        if inst:
+            self.emit('progress', data={'status': inst.mc_status, 'at': room}, room=room)
+            # self.print('AFP(id %s) %s %s -> %s' % (id(inst), inst.afp, inst.mc_status, inst.mc_event))
+
+    def api_stop(self, data):
+        afp = data.get('at')
+        inst = ins.ins_tasks.get(afp)
+
+        if inst:
+            if inst.is_paused() or inst.is_executing():
+                self.print('STOP AFP(%s, %s)' % (id(inst), afp))
+                inst.stop()
+                return
+        self.print('WARNING: AFP(%s) IS NOT RUNNING' % afp)
+
+    def api_resume(self, data):
+        afp = data.get('at')
+        inst = ins.ins_tasks.get(afp)
+
+        if inst and inst.is_paused():
+            self.print('RESUME AFP(%s, %s)' % (id(inst), afp))
+            inst.resume()
+            return
+        self.print('WARNING: AFP(%s) IS NOT RUNNING' % afp)
+
+    def api_pause(self, data):
+        afp = data.get('at')
+        inst = ins.ins_tasks.get(afp)
+
+        if inst and inst.is_executing():
+            self.print('PAUSE AFP(%s, %s)' % (id(inst), afp))
+            inst.pause()
+            return
+        self.print('WARNING: AFP(%s) IS NOT RUNNING' % afp)
+
+    def api_execute(self, data):
+        afp = data.get('at')
+        inst = ins.ins_tasks.get(afp)
+
+        # executing
+        if inst and inst.is_executing():
+            self.print('WARNING: AFP(%s, %s) IS RUNNING' % (id(inst), afp))
+            return
+        # paused
+        elif inst and inst.is_paused():
+            self.print('WARNING: AFP(%s, %s) IS PAUSED' % (id(inst), afp))
+            return
+        # stopped
+        elif inst:
+            inst.uninit()
+
+        # self.afp is required for self.print
+        self.afp = afp
+        self.print('EXECUTE: %s, %s' % (afp, datetime.datetime.now()))
+        ts1 = time.perf_counter()
+        ts2 = time.time()
+
+        try:
+            action = data.get('action')
+            event = action.split(':')[-1].upper()
+            self.events[event](data)
+        except EOFError as _:
+            pass
+        except Exception as e:
+            self.print('ERROR: %s' % repr(e))
+            self.print('TRACE: %s' % traceback.format_exc())
+
+        self.print('STOP: %s, %s' % (afp, datetime.datetime.now()))
+        self.print('TOTAL COST: %s, %s' % (round(time.perf_counter() - ts1, 5),
+                                           round(time.time() - ts2, 5)))
+        inst = ins.ins_tasks.get(afp)
+        inst.stop()
+
+    def on_task(self, data):
+        api = self.apis.get(data.get('action'))
+        self.socketio.start_background_task(api, data)
+
+    @sio.event
+    async def my_event(sid, message):
+        await sio.emit('my_response', {'data': message['data']}, room=sid)
+
+
+    @sio.event
+    async def my_broadcast_event(sid, message):
+        await sio.emit('my_response', {'data': message['data']})
+
+
+    @sio.event
+    async def join(sid, message):
+        await sio.enter_room(sid, message['room'])
+        await sio.emit('my_response', {'data': 'Entered room: ' + message['room']}, room=sid)
+
+
+    @sio.event
+    async def leave(sid, message):
+        await sio.leave_room(sid, message['room'])
+        await sio.emit('my_response', {'data': 'Left room: ' + message['room']}, room=sid)
+
+
+    @sio.event
+    async def close_room(sid, message):
+        await sio.emit('my_response', {'data': 'Room ' + message['room'] + ' is closing.'}, room=message['room'])
+        await sio.close_room(message['room'])
+
+
+    @sio.event
+    async def my_room_event(sid, message):
+        await sio.emit('my_response', {'data': message['data']}, room=message['room'])
+
+
+    @sio.event
+    async def disconnect_request(sid):
+        await sio.disconnect(sid)
+
+
+    @sio.event
+    async def connect(sid, environ):
+        await sio.emit('my_response', {'data': 'Connected', 'count': 0}, room=sid)
+
+
+    @sio.event
+    def disconnect(sid):
+        print('Client disconnected')
 
 
 if __name__ == '__main__':
