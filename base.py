@@ -23,7 +23,6 @@ from flask_socketio import Namespace, join_room
 import ins
 import cons
 import independence
-from sc_app import sio
 
 ojn = os.path.join
 oid = os.path.isdir
@@ -615,7 +614,8 @@ class MetaFile(object):
                 #             for d in ds:
                 #                 if _d.lower() in d.lower():
                 #                     print(a, ojn(r, d))
-                return ((a, ojn(r, d)) for a in apps for _d in v for r, ds, _ in os.walk(cls.a_ddp(a)) for d in ds if _d.lower() in d.lower())
+                return ((a, ojn(r, d)) for a in apps for _d in v for r, ds, _ in os.walk(cls.a_ddp(a)) for d in ds if
+                        _d.lower() in d.lower())
             return ((a, cls.a_ddp(a)) for a in apps)
 
         def fs_f(fts, ads, ft='f'):
@@ -629,9 +629,11 @@ class MetaFile(object):
                 #             for f in fs:
                 #                 if _f.lower() in f.lower():
                 #                     print(a, ojn(r, f).replace(cls.a_ddp(a), '')[1:])
-                return ((a, ojn(r, f).replace(cls.a_ddp(a), '')[1:]) for a, d in ads for _f in v for r, _, fs in os.walk(d) for f in fs if _f.lower() in f.lower())
+                return ((a, ojn(r, f).replace(cls.a_ddp(a), '')[1:]) for a, d in ads for _f in v for r, _, fs in
+                        os.walk(d) for f in fs if _f.lower() in f.lower())
             else:
-                return ((a, ojn(r, f).replace(cls.a_ddp(a), '')[1:]) for a, d in ads for r, _, fs in os.walk(d) for f in fs)
+                return ((a, ojn(r, f).replace(cls.a_ddp(a), '')[1:]) for a, d in ads for r, _, fs in os.walk(d) for f in
+                        fs)
 
         def fs_suffix(fts, afs, ft='s'):
             if ft in fts and fts[ft]:
@@ -1256,10 +1258,10 @@ class MetaController(object):
         return self.mc_status in (self.E_EXECUTE, self.E_RESUME,)
 
     def is_paused(self):
-        return self.mc_status in (self.E_PAUSE, )
+        return self.mc_status in (self.E_PAUSE,)
 
     def is_stopped(self):
-        return self.mc_status in (self.E_STOP, )
+        return self.mc_status in (self.E_STOP,)
 
     def start(self):
         self.action(event=self.E_EXECUTE)
@@ -1533,53 +1535,6 @@ class MetaSocketIO(MetaFile):
     def on_task(self, data):
         api = self.apis.get(data.get('action'))
         self.socketio.start_background_task(api, data)
-
-    @sio.event
-    async def my_event(sid, message):
-        await sio.emit('my_response', {'data': message['data']}, room=sid)
-
-
-    @sio.event
-    async def my_broadcast_event(sid, message):
-        await sio.emit('my_response', {'data': message['data']})
-
-
-    @sio.event
-    async def join(sid, message):
-        await sio.enter_room(sid, message['room'])
-        await sio.emit('my_response', {'data': 'Entered room: ' + message['room']}, room=sid)
-
-
-    @sio.event
-    async def leave(sid, message):
-        await sio.leave_room(sid, message['room'])
-        await sio.emit('my_response', {'data': 'Left room: ' + message['room']}, room=sid)
-
-
-    @sio.event
-    async def close_room(sid, message):
-        await sio.emit('my_response', {'data': 'Room ' + message['room'] + ' is closing.'}, room=message['room'])
-        await sio.close_room(message['room'])
-
-
-    @sio.event
-    async def my_room_event(sid, message):
-        await sio.emit('my_response', {'data': message['data']}, room=message['room'])
-
-
-    @sio.event
-    async def disconnect_request(sid):
-        await sio.disconnect(sid)
-
-
-    @sio.event
-    async def connect(sid, environ):
-        await sio.emit('my_response', {'data': 'Connected', 'count': 0}, room=sid)
-
-
-    @sio.event
-    def disconnect(sid):
-        print('Client disconnected')
 
 
 if __name__ == '__main__':
