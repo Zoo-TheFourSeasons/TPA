@@ -75,7 +75,7 @@ def rtk(func):
         def _warp():
             # require user
             if cons.APP_USR in ins.ins_bps:
-                tk = request.args.get('tk', '')
+                tk = request.headers.get('Token')
                 if not tk or tk not in ins.ins_tokens:
                     if 'json' in str(request.accept_mimetypes):
                         return make_response({'status': False, 'message': 'login required'}, 403, None)

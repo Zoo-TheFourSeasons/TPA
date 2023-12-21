@@ -91,22 +91,12 @@ socket_io = SocketIO(
 )
 
 
-@app_.route('/login', methods=['get'], defaults={'f': 'login'}, endpoint='login')
-@app_.route('/register', defaults={'f': 'register'}, methods=['get'], endpoint='register')
-@ind.wex
-@ind.c4s(log=True)
-def _(f):
-    if cons.APP_USR not in ins.ins_bps:
-        return redirect(url_for('home'))
-    return rt('%s.html' % f, **{'_bps': ins.ins_bps})
-
-
 @app_.route('/', methods=['get'], defaults={'a': '', 'e': '', 'f': ''}, endpoint='home')
 @app_.route('/webs/<string:f>', defaults={'a': '', 'e': ''}, methods=['get'], endpoint='f')
 @app_.route('/webs/<string:a>/<string:f>', methods=['get'], defaults={'e': ''}, endpoint='a')
 @app_.route('/webs/<string:a>:<string:e>/<string:f>', methods=['get'], endpoint='e')
 @ind.wex
-@ind.rtk
+# @ind.rtk
 @ind.c4s(log=True)
 def _(a, e, f):
     if a and a not in ins.ins_bps:

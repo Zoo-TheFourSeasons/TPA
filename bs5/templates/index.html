@@ -175,6 +175,12 @@
                 <button id="search" class="btn btn-outline-success" type="button" data-bs-toggle="tooltip"
                         data-bs-placement="bottom" title="SEARCH"><i
                         class="fas fa-fw fa-search"></i></button>
+                {% if 'user' in _bps %}
+                    <a class="btn btn-outline-info"
+                       href="/user/logout" data-bs-toggle="tooltip"
+                       data-bs-placement="bottom" title="LOGOUT">
+                    <i class="fa-solid fa-fw fa-right-from-bracket"></i></a>
+                {% endif %}
             </div>
         </div>
     </div>

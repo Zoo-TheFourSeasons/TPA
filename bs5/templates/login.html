@@ -54,7 +54,7 @@
         <h1 class="h3 mb-3 fw-normal"></h1>
         <div class="btn-group full">
             <button class="btn btn-lg btn-primary btn-block" id="commit" type="button">LOGIN</button>
-            <a href="/register" class="btn btn-lg btn-outline-secondary">R</a>
+            <a href="/webs/register" class="btn btn-lg btn-outline-secondary">R</a>
         </div>
     </form>
 </main>
@@ -78,12 +78,17 @@
                 'data': user.json('login'),
                 'success': function (rsp) {
                     console.log(rsp);
-                    if (next !== undefined){
-                        {#let tmp = '/' + next + '?tk=' + rsp.data.tk;#}
-                        window.location.assign(tmp);
-                     } else {
-                        window.location.assign('/?tk=' + rsp.data.tk);
-                     }
+                    {#axios.defaults.headers.get['Token'] = rsp.data.tk;#}
+
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(rsp.data, 'text/html');
+                    document.body.innerHTML = doc.body.innerHTML;
+
+                    if (next !== undefined) {
+                        {#window.location.assign('/' + next);#}
+                    } else {
+                        {#window.location.assign('/');#}
+                    }
                 }
             };
             user.get(params);
