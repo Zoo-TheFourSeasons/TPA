@@ -682,17 +682,16 @@
 
         {# max #}
         $bd.on('click', '#max', function () {
-            if ($div_vw.hasClass('col-lg-9')) {
+            if ($div_vw.hasClass('col-lg-10')) {
                 $menu[0].setAttribute('hidden', 'hidden');
                 $div_tb[0].setAttribute('hidden', 'hidden');
-                $div_vw.removeClass('col-lg-9');
+                $div_vw.removeClass('col-lg-10');
                 $div_vw.addClass('col-lg-12');
-
             } else {
                 $menu[0].removeAttribute('hidden');
                 $div_tb[0].removeAttribute('hidden');
                 $div_vw.removeClass('col-lg-12');
-                $div_vw.addClass('col-lg-9');
+                $div_vw.addClass('col-lg-10');
             }
             ins_vw.resize(null, '805px');
         });
