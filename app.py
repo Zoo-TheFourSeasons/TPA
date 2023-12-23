@@ -10,7 +10,6 @@ from flask_apscheduler import APScheduler
 from flask import jsonify
 from flask import render_template as rt
 from flask import request as r
-from flask import redirect, url_for
 
 import independence as ind
 import ins
