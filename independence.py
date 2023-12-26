@@ -75,17 +75,17 @@ def rtk(func):
         def _warp():
             # require user
             if cons.APP_USR in ins.ins_bps:
-                tk = request.headers.get('Token')
+                tk = request.args.get('tk', '')
                 if not tk or tk not in ins.ins_tokens:
                     if 'json' in str(request.accept_mimetypes):
                         return make_response({'status': False, 'message': 'login required'}, 403, None)
                     # n = request.url.replace(request.url_root, '').replace(tk, '')
                     # return redirect(url_for('login', next=n))
-                    return redirect(url_for('login'))
+                    return redirect('/webs/login')
             # require bps
             app = request.view_args.get('app')
             if app and app not in ins.ins_bps:
-                return redirect(url_for('login'))
+                return redirect('/webs/login')
             return func(*args, **kwargs)
         return _warp()
     return warp

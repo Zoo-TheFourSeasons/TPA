@@ -1,14 +1,15 @@
-pyyaml
-paramiko
-flask==2.2.2
-flask-apscheduler
+Flask==2.2.2
+Flask-APScheduler==1.12.4
 Flask-SocketIO==5.2.0
-selectolax
-aiohttp
-requests
-requests-toolbelt
+Flask-SQLAlchemy==3.0.3
+Flask-WTF==1.1.1
+selectolax==0.3.16
+aiohttp==3.8.4
+requests==2.31.0
+requests-ntlm==1.1.0
+requests-toolbelt==0.10.1
 # zoo
-pillow
+Pillow==10.0.0
 # tensorflow-cpu
 # tf-models-official
 # fedora
@@ -16,9 +17,14 @@ pillow
 # ubuntu
 # sudo apt-get install python3-opencv
 # opencv-python
-pandas
-numpy
-akshare
-exifread
-sanic
-sanic-ext
+pandas==1.5.3
+paramiko==2.12.0
+PyYAML==6.0.1
+numpy==1.24.2
+akshare==1.10.72
+ExifRead==3.0.0
+sanic==23.6.0
+sanic-ext==23.6.0
+sanic-routing==23.6.0
+Werkzeug==2.2.2
+pycryptodomex==3.11.0

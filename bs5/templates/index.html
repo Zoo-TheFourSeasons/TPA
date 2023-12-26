@@ -176,10 +176,9 @@
                         data-bs-placement="bottom" title="SEARCH"><i
                         class="fas fa-fw fa-search"></i></button>
                 {% if 'user' in _bps %}
-                    <a class="btn btn-outline-info"
-                       href="/user/logout" data-bs-toggle="tooltip"
-                       data-bs-placement="bottom" title="LOGOUT">
-                    <i class="fa-solid fa-fw fa-right-from-bracket"></i></a>
+                    <button class="btn btn-outline-info logout" data-bs-toggle="tooltip"
+                            data-bs-placement="bottom" title="LOGOUT">
+                        <i class="fa-solid fa-fw fa-right-from-bracket"></i></button>
                 {% endif %}
             </div>
         </div>
@@ -219,57 +218,57 @@
 </div>
 
 {% block content %}
-<div class="row m-0">
-    <div class="col-lg-2 p-0" id="div_tb">
-        <div class="table-responsive">
-            <table class="table table-striped table-hover table-bordered table-condensed table-no-bordered table-centered table-nowrap m-0"
-                   id="table"
-                   data-toggle="table"
-                   data-locale="en-US"
-                   data-sticky-header="true"
-                   data-show-jumpto="true"
-                   data-icon-size="sm"
-                   data-page-size="25"
-                   data-side-pagination="server"
-                   data-click-to-select="false"
-                   data-pagination="true"
-                   data-falign="center"
-                   data-search="true"
-                    {#                               data-detail-view="true"#}
-                    {#                               data-detail-formatter="detailFormatter"#}
-                   data-id-field="id"
-                   data-sort-name="id"
-                   data-sort-order="desc"
-                   data-pagination-h-align="left"
-                   data-pagination-detail-h-align="left"
-                   data-unique-id="id"
-                   data-page-list="[24]">
-                <thead class="table-light">
-                <tr>
-{#                    <th data-align="center" data-width="30px" data-formatter="iFormatter">N</th>#}
-                    <th data-align="center" data-field="state" data-width="30px" data-checkbox="true"></th>
-                    <th data-align="left" data-field="afp" data-visible="false">AFP</th>
-                    <th data-align="left" data-field="app" data-visible="false">APP</th>
-                    <th data-align="right" data-field="ctime" data-visible="false">CTIME</th>
-                    <th data-align="right" data-field="mtime" data-visible="false">MTIME</th>
-                    <th data-align="right" data-field="size" data-visible="false">SIZE</th>
-                    <th data-align="left" data-field="fn" data-formatter="fileViewFormatter">FILE</th>
-                    <th data-align="left" data-formatter="operateFormatter" data-width="30px">OPS</th>
-                </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
+    <div class="row m-0">
+        <div class="col-lg-2 p-0" id="div_tb">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover table-bordered table-condensed table-no-bordered table-centered table-nowrap m-0"
+                       id="table"
+                       data-toggle="table"
+                       data-locale="en-US"
+                       data-sticky-header="true"
+                       data-show-jumpto="true"
+                       data-icon-size="sm"
+                       data-page-size="25"
+                       data-side-pagination="server"
+                       data-click-to-select="false"
+                       data-pagination="true"
+                       data-falign="center"
+                       data-search="true"
+                        {#                               data-detail-view="true"#}
+                        {#                               data-detail-formatter="detailFormatter"#}
+                       data-id-field="id"
+                       data-sort-name="id"
+                       data-sort-order="desc"
+                       data-pagination-h-align="left"
+                       data-pagination-detail-h-align="left"
+                       data-unique-id="id"
+                       data-page-list="[24]">
+                    <thead class="table-light">
+                    <tr>
+                        {#                    <th data-align="center" data-width="30px" data-formatter="iFormatter">N</th>#}
+                        <th data-align="center" data-field="state" data-width="30px" data-checkbox="true"></th>
+                        <th data-align="left" data-field="afp" data-visible="false">AFP</th>
+                        <th data-align="left" data-field="app" data-visible="false">APP</th>
+                        <th data-align="right" data-field="ctime" data-visible="false">CTIME</th>
+                        <th data-align="right" data-field="mtime" data-visible="false">MTIME</th>
+                        <th data-align="right" data-field="size" data-visible="false">SIZE</th>
+                        <th data-align="left" data-field="fn" data-formatter="fileViewFormatter">FILE</th>
+                        <th data-align="left" data-formatter="operateFormatter" data-width="30px">OPS</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-lg-10 p-0" id="div_vw">
+            <div id="viewer_md">
+                {% block view %}
+                {% endblock %}
+            </div>
         </div>
     </div>
-    <div class="col-lg-10 p-0" id="div_vw">
-        <div id="viewer_md">
-            {% block view %}
-            {% endblock %}
-        </div>
-    </div>
-</div>
-{% include 'modal.html' %}
+    {% include 'modal.html' %}
 {% endblock %}
 
 {# BOOKMARKS #}
@@ -402,18 +401,30 @@
     let app_io;
     {#let aep;#}
 
-    $bd.on('click', '.rtk-btn', function () {
-        if (tk === undefined || tk === 'undefined') {
-            window.location.assign(this.name)
-        } else {
-            window.location.assign(this.name + '?tk=' + tk)
-        }
-    });
-
     $(document).ready(function () {
         let tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
         let tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+
+        $bd.on('click', '.rtk-btn', function () {
+            if (tk === undefined || tk === 'undefined') {
+                window.location.assign(this.name)
+            } else {
+                window.location.assign(this.name + '?tk=' + tk)
+            }
+        });
+
+        $bd.on('click', '.logout', function () {
+            get({
+                'url': '/user/logout',
+                'btn': $(this),
+                'data': {},
+                'success': function (rsp) {
+                    console.log(rsp);
+                    window.location.assign('/webs/login');
+                }
+            });
         });
 
         // {#$(".modal").draggable();#}
@@ -537,6 +548,7 @@
         });
 
         {# view callback #}
+
         function cb_view(rsp) {
             let $vw = $("#viewer_md");
             $vw.empty();
@@ -567,10 +579,10 @@
                     width: "100%",
                     height: $(document).height() - $div_tb.offset().top - 25,
                     {#autoHeight: true,#}
-                    watch            : false,
-                    toolbar          : false,
-                    codeFold         : true,
-                    searchReplace    : true,
+                    watch: false,
+                    toolbar: false,
+                    codeFold: true,
+                    searchReplace: true,
                     value: rsp.data.rows,
                     theme: 'default',
                     mode: 'python',
@@ -654,7 +666,7 @@
             app_io.on('progress', progress);
         }
 
-        function leave_room(){
+        function leave_room() {
             if (app_io !== undefined) {
                 app_io.close();
             }

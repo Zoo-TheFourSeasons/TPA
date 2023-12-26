@@ -78,17 +78,12 @@
                 'data': user.json('login'),
                 'success': function (rsp) {
                     console.log(rsp);
-                    {#axios.defaults.headers.get['Token'] = rsp.data.tk;#}
-
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(rsp.data, 'text/html');
-                    document.body.innerHTML = doc.body.innerHTML;
-
-                    if (next !== undefined) {
-                        {#window.location.assign('/' + next);#}
-                    } else {
-                        {#window.location.assign('/');#}
-                    }
+                    if (next !== undefined){
+                        {#let tmp = '/' + next + '?tk=' + rsp.data.tk;#}
+                        window.location.assign(tmp);
+                     } else {
+                        window.location.assign('/?tk=' + rsp.data.tk);
+                     }
                 }
             };
             user.get(params);
