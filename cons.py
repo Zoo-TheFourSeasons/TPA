@@ -34,13 +34,7 @@ class Apps(object):
         APP_ENC: (APP_ENC, ),
         APP_SQU: (APP_SQU, ),
         APP_TIM: (APP_TIM, ),
-        APP_USR: (APP_USR, ),
+        # APP_USR: (APP_USR, ),
         APP_STA: (APP_STA, ),
         APP_SPA: (APP_SPA, ),
     }
-
-
-APPS_DEFAULT = (
-    APP_DSP, APP_KNO, APP_HIS, APP_TIM,
-    APP_ENC, APP_SPA, APP_FIN, APP_STA, APP_SQU,
-)
