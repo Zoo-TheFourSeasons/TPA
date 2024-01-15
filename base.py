@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import html
 import sys
 import json
 import copy
@@ -247,9 +248,9 @@ class MetaFile(object):
                 if k in pt:
                     pt = pt.replace(k, v)
         if isinstance(self, MetaWebSocket) and self.afp:
-            self.emit('his', data=pt + '\n', room=self.afp)
+            self.emit('his', data=html.escape(pt) + '\n', room=self.afp)
         if isinstance(self.ns, MetaWebSocket) and self.afp:
-            self.ns.emit('his', data=pt + '\n', room=self.afp)
+            self.ns.emit('his', data=html.escape(pt) + '\n', room=self.afp)
         print(pt)
         current_his = None if 'current_his' not in self.__dict__ else self.current_his
         if not current_his:
