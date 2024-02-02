@@ -691,7 +691,7 @@ class MetaFile(object):
         return {'status': True}
 
     @classmethod
-    def th(cls, text: str, app: str, target: str) -> dict:
+    def th(cls, text: str, app: str, target: str, spa=True) -> dict:
         print('th', app, target)
         if not target:
             return {'status': False, 'message': 'target is required'}
@@ -703,7 +703,7 @@ class MetaFile(object):
             os.makedirs(_dir)
 
         try:
-            if oex(t):
+            if spa and oex(t):
                 os.rename(t, '.'.join((t, cls.tsp(st=2, ed=-2), 'spa')))
             with open(t, 'w') as f:
                 f.write(text)
