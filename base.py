@@ -1,29 +1,33 @@
 # -*- coding: utf-8 -*-
-import os
-import html
-import sys
-import json
-import copy
-import time
-import uuid
 import base64
-import shutil
-import logging
+import copy
 import datetime
+import html
 import importlib
-import threading
-import traceback
-import subprocess
+import json
+import logging
 import multiprocessing
 from multiprocessing.dummy import Process
+import os
+import sys
+import shutil
+import subprocess
+import time
+import threading
+import traceback
+import uuid
 
 import requests
+import cv2
+import numpy
 import yaml
-from flask_socketio import Namespace, join_room
+from flask_socketio import Namespace, join_room, leave_room, send
+from flask import send_from_directory
 
 import ins
 import cons
 import independence
+from cons import APP_SQU
 
 ojn = os.path.join
 oid = os.path.isdir
@@ -217,6 +221,22 @@ class MetaFile(object):
         self.current_his = None
 
     @staticmethod
+    def is_pic(fn):
+        return fn.lower().split('.')[-1] in ('jpg', 'jpeg', 'png')
+
+    @staticmethod
+    def is_vid(fn):
+        return fn.lower().split('.')[-1] in ('mp4', 'avi', 'mkv', 'webm', 'mkv', 'ogv')
+
+    @staticmethod
+    def is_aud(fn):
+        return fn.lower().split('.')[-1] in ('wav', 'ogg', 'mp3')
+
+    @staticmethod
+    def is_xls(fn):
+        return fn.lower().split('.')[-1] in ('xlsx', 'xls', )
+
+    @staticmethod
     def ly(t):
         if not oex(t):
             raise FileNotFoundError('ly error, file not exist: %s' % t)
@@ -235,7 +255,7 @@ class MetaFile(object):
             except Exception as e:
                 raise ValueError('dy error: %s, e: %s' % (t, e))
 
-    def print(self, pt, wt: dict = None, nolog: bool = False, mix: dict = None):
+    def print(self, pt, wt: dict = None, nolog: bool = False, mix: dict = None, room=None):
         if isinstance(pt, (dict, list, tuple)):
             try:
                 pt = json.dumps(pt, default=str, indent=2)
@@ -247,11 +267,13 @@ class MetaFile(object):
             for k, v in mix.items():
                 if k in pt:
                     pt = pt.replace(k, v)
-        if isinstance(self, MetaWebSocket) and self.afp:
-            self.emit('his', data=html.escape(pt) + '\n', room=self.afp)
-        if isinstance(self.ns, MetaWebSocket) and self.afp:
-            self.ns.emit('his', data=html.escape(pt) + '\n', room=self.afp)
-        print(pt)
+        room = room if room else self.afp
+        if room:
+            if isinstance(self, MetaWebSocket):
+                self.emit('his', data=html.escape(pt) + '\n', room=room)
+            if isinstance(self.ns, MetaWebSocket):
+                self.ns.emit('his', data=html.escape(pt) + '\n', room=room)
+        # print(pt)
         current_his = None if 'current_his' not in self.__dict__ else self.current_his
         if not current_his:
             # print('WARNING: THERE IS NOT CURRENT_HIS')
@@ -293,7 +315,7 @@ class MetaFile(object):
         return search, sort, order, offset, limit
 
     @classmethod
-    def __view_img(cls, t):
+    def view_img(cls, t):
         with open(t, 'rb') as f:
             b64 = 'data:;base64,' + str(base64.b64encode(f.read()))[2:-1]
             return {'status': True, 'rows': b64, 'is_image': True, 'type': 'img'}
@@ -395,6 +417,8 @@ class MetaFile(object):
             raise ValueError('unknown app: %s' % a)
         if a in (cons.APP_ENC, cons.APP_ZOO):
             return odn(PATH_PROJECT)
+        if a in (cons.APP_FIL, ):
+            return '/file/data'
         dp = ojn(ojn(PATH_PROJECT, a), 'data')
         dp = dp if not e else ojn(dp, e)
         # dp = '/home/zin/Desktop/_Y/TPA/timing/data'
@@ -416,29 +440,67 @@ class MetaFile(object):
     @independence.timer
     def dd(cls, app: str, target: str):
         print('dd', app, target)
+        fp = cls.a_dfp(app, target)
+        fd, fn = os.path.split(fp)
 
-        v = cls.a_dfp(app, target)
-        _, fn = osp(v)
-        lw = target.lower()
-        # txt
-        fnd = '%s.%s.txt' % (fn, cls.tsp(ed=17))
-        # img xls
-        for end in ('.jpg', '.png', '.jpeg', '.webp', '.xlsx', '.xls'):
-            if lw.endswith(end):
-                fnd = fn
-                break
-        with open(v, 'rb') as f:
-            ctx = f.read()
+        return send_from_directory(fd, fn, as_attachment=True)
 
-        # for CN
-        from urllib.parse import quote
+        # v = cls.a_dfp(app, target)
+        # _, fn = osp(v)
+        # lw = target.lower()
+        # # txt
+        # fnd = '%s.%s.txt' % (fn, cls.tsp(ed=17))
+        # # img xls
+        # for end in ('.jpg', '.png', '.jpeg', '.webp', '.xlsx', '.xls'):
+        #     if lw.endswith(end):
+        #         fnd = fn
+        #         break
+        # with open(v, 'rb') as f:
+        #     ctx = f.read()
+        #
+        # # for CN
+        # from urllib.parse import quote
+        #
+        # response = independence.make_response_with_headers(ctx, {
+        #     'Content-Type': 'application/octet-stream',
+        #     'Content-Disposition': "attachment; filename*=utf-8''%s" % (quote(fnd))
+        # })
+        #
+        # return response
 
-        response = independence.make_response_with_headers(ctx, {
-            'Content-Type': 'application/octet-stream',
-            'Content-Disposition': "attachment; filename*=utf-8''%s" % (quote(fnd))
-        })
+    @classmethod
+    @independence.timer
+    def up(cls, app: str, target: str, file):
+        fp = os.path.join(cls.a_dfp(app, target), file.filename)
+        if os.path.exists(fp):
+            return
+        file.save(fp)
+        return {'status': True}
 
-        return response
+    @classmethod
+    @independence.timer
+    def rs(cls, app: str, target: str, lt: str, rb: str, o: str):
+        fp = cls.a_dfp(app, target)
+        if not os.path.exists(fp):
+            return {'status': False, 'message': 'FILE NOT EXIST: %s' % fp}
+        ox, oy = o.split(',')
+        ox, oy = int(float(ox)), int(float(oy))
+        ltx, lty = lt.split(',')
+        rbx, rby = rb.split(',')
+        ltx, lty = int(float(ltx)), int(float(lty))
+        rbx, rby = int(float(rbx)), int(float(rby))
+
+        hi = rby - lty
+        wi = rbx - ltx
+        if hi < 0 or wi < 0:
+            return {'status': False, 'message': 'hi or wi < 0'}
+        frame = cv2.imread(fp)
+        h, w, _ = frame.shape
+        canvas = numpy.zeros((hi, wi, 3), dtype=numpy.uint8)
+        canvas[:hi, :wi] = frame[lty - oy: hi + lty - oy, ltx - ox: wi + ltx - ox]
+        cv2.imwrite(fp, canvas)
+
+        return {'status': True, 'b64': cls.view_img(fp)['rows']}
 
     @classmethod
     def ldr(cls, app: str, target: str, args_r: dict = None, suffix=None) -> dict:
@@ -455,16 +517,14 @@ class MetaFile(object):
                     break
                 _fp = cls.a_dfp(_app, afp)
                 stat = os.stat(_fp)
-                ctime = stat.st_ctime
-                mtime = stat.st_mtime
                 size = os.path.getsize(_fp) / 1024.0
                 size = str(round(size / 1024.0, 1)) + 'M' if size > 2048 else str(round(size, 1)) + 'K'
                 _, fn = osp(_fp)
                 r.append({
                     'fn': fn,
                     'isdir': oid(_fp),
-                    'ctime': time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(ctime)),
-                    'mtime': time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(mtime)),
+                    'ctime': time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(stat.st_ctime)),
+                    'mtime': time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(stat.st_mtime)),
                     'size': size,
                     'app': _app,
                     'afp': afp,
@@ -504,32 +564,29 @@ class MetaFile(object):
             return {'status': False, 'message': 'there is not exist: %s' % target, 'type': 'txt'}
         if not oif(v):
             return {'status': False, 'message': 'is not a file: %s' % target, 'type': 'txt'}
-
         fd, fn = osp(target)
-        lw = fn.lower()
-        target = '/'.join((app, target))
-        target_split = target.split('/')
+        at = '/'.join((app, target))
+        target_split = at.split('/')
         parents = [{'i': e, 'i_path': '/'.join(target_split[1:i + 1])} for i, e in enumerate(target_split)]
         pfn = {'parents': parents, 'fn': fn, 'app': app, 'parent': fd}
+        # audio video
+        if cls.is_aud(v) or cls.is_vid(v):
+            # return cls.dd(app, target)
+            rsp = {'status': True, 'rows': '/' + app + '/download?target=' + target , 'is_image': False, 'type': 'aud' if cls.is_aud(v) else 'vid'}
         # img
-        for end in ('.jpg', '.png', '.jpeg', '.webp'):
-            if lw.endswith(end):
-                rsp = cls.__view_img(v)
-                rsp.update(pfn)
-                return rsp
+        elif cls.is_pic(v):
+            rsp = cls.view_img(v)
         # xls
-        for end in ('.xlsx', '.xls'):
-            if lw.endswith(end):
-                rsp = cls.__view_xls(v, args_r)
-                rsp.update(pfn)
-                return rsp
+        elif cls.is_xls(v):
+            rsp = cls.__view_xls(v, args_r)
         # txt
-        try:
-            rsp = cls.__view_txt(v)
-            rsp.update(pfn)
-            return rsp
-        except Exception as e:
-            return {'status': False, 'message': 'unknown file: %s' % e, 'type': 'txt'}
+        else:
+            try:
+                rsp = cls.__view_txt(v)
+            except Exception as e:
+                rsp = {'status': False, 'message': 'unknown file: %s' % e, 'type': 'txt'}
+        rsp.update(pfn)
+        return rsp
 
     @classmethod
     @independence.timer
@@ -578,7 +635,7 @@ class MetaFile(object):
                     cls.__execute_py(fp)
             except Exception as e:
                 failed.append(fn)
-                print(traceback.format_exc())
+                # print(traceback.format_exc())
                 message = 'failed in execute: %s' % e
         return {'status': False if failed else True, 'message': message}
 
@@ -655,7 +712,6 @@ class MetaFile(object):
             if ft in fts and fts[ft]:
                 v = fts[ft]
                 v = v.split(' ')
-                pass
             return list(afs)
 
         # search a=all,f=fwaas
@@ -703,7 +759,7 @@ class MetaFile(object):
             os.makedirs(_dir)
 
         try:
-            if spa and oex(t):
+            if spa and oex(t) and app != APP_SQU:
                 os.rename(t, '.'.join((t, cls.tsp(st=2, ed=-2), 'spa')))
             with open(t, 'w') as f:
                 f.write(text)
@@ -715,21 +771,24 @@ class MetaFile(object):
     def frs(target: str, start: int, end: int, executor=None) -> list:
         # file read special
         if start == end:
-            # self.print('  WITHOUT LOG: %s' % target)
             return []
         # for local: return [x for i, x in enumerate(open(target, 'r')) if start <= i + 1 <= end]
         _, stdout, stderr = executor("sed -n '%s,%sp' %s" % (start + 1, end, target))
         rsp = stdout.read().decode()
-        # self.print('  LOG: %s\n  %s' % (target, rsp))
         return rsp.strip().split('\n')
 
     @staticmethod
-    def fgc(target: str, executor=None) -> int:
-        # file get count
-        _, stdout, stderr = executor('grep -c "" %s' % target)
-        rsp = stdout.read().decode().strip()
-        rsp = int(rsp) if rsp else 0
-        # self.print('file_get_count: %s' % rsp)
+    def fgc(target: str, executor=None, is_windows=False) -> int:
+        # file get count'
+        if is_windows:
+            _, stdout, stderr = executor('find /v /c "" %s' % target)
+            rsp = stdout.read().decode().strip()
+            rsp = int(rsp.split(' ')[-1]) if rsp else 0
+        else:
+            _, stdout, stderr = executor('grep -c "" %s' % target)
+            rsp = stdout.read().decode().strip()
+            rsp = int(rsp) if rsp else 0
+
         return rsp
 
     @classmethod
@@ -1020,7 +1079,6 @@ class MetaFile(object):
 
                 if raw not in unmatched:
                     unmatched[raw] = str(uuid.uuid4())
-                # print('!!! UNMATCHED: %s' % raw)
                 # unmatched = {
                 #     '{{yft.rows}}': '2954a66b-c9b9-4d4f-8579-7b69682bff39'
                 # }
@@ -1042,13 +1100,12 @@ class MetaFile(object):
                     continue
                 v = copy.deepcopy(running)
                 v = replace_dict(field)
-                if isinstance(v, (dict, list, tuple)):
+                if isinstance(v, (dict, list, tuple, int, float)):
                     # todo
                     if raw == mix:
                         return v
                     raise ValueError('value type error: %s' % v)
                 mix = mix.replace(raw, v)
-                pass
 
             # uui -> {{unmatched}}
             while [tmp for raw, tmp in unmatched.items() if tmp in mix]:
@@ -1093,8 +1150,6 @@ class MetaFile(object):
                 v = None
             elif v.lower() in ('true',):
                 v = True
-            else:
-                pass
             values[key] = v
         # values = {
         #     'X86': 'cirros-x86',
@@ -1125,8 +1180,6 @@ class MetaFile(object):
                     params[i] = func(v, running, dumping=dumping)
                 elif isinstance(v, (dict, list, tuple)):
                     params[i] = cls.display_params(v, running, func, key_except, dumping)
-                else:
-                    pass
         return params
 
     @staticmethod
@@ -1249,11 +1302,11 @@ class MetaController(object):
         if self.afp is None:
             raise ValueError('AFP IS NONE')
         ins.ins_tasks[self.afp] = self
-        # if isinstance(self.ns, MetaWebSocket):
-        #     self.ns.progress(self, self.afp)
 
     def uninit(self):
-        ins.ins_tasks.pop(self.afp, None)
+        task = ins.ins_tasks.pop(self.afp, None)
+        if task:
+            task.stop()
 
     def is_executing(self):
         return self.mc_status in (self.E_EXECUTE, self.E_RESUME,)
@@ -1349,7 +1402,7 @@ class MetaWebSocket(Namespace, MetaFile):
 
     def on_join(self, data):
         self.print('join: %s' % data)
-        afp = data.get('at')
+        afp = data.get('room')
         join_room(afp)
         inst = ins.ins_tasks.get(afp)
         if inst and not inst.is_stopped():
@@ -1358,54 +1411,58 @@ class MetaWebSocket(Namespace, MetaFile):
     def progress(self, inst, room):
         if inst:
             self.emit('progress', data={'status': inst.mc_status, 'at': room}, room=room)
-            # self.print('AFP(id %s) %s %s -> %s' % (id(inst), inst.afp, inst.mc_status, inst.mc_event))
 
     def api_stop(self, data):
         afp = data.get('at')
-        inst = ins.ins_tasks.get(afp)
+        task = ins.ins_tasks.get(afp)
 
-        if inst:
-            if inst.is_paused() or inst.is_executing():
-                self.print('STOP AFP(%s, %s)' % (id(inst), afp))
-                inst.stop()
-                return
-        self.print('WARNING: AFP(%s) IS NOT RUNNING' % afp)
+        if task and (task.is_paused() or task.is_executing()):
+            self.print('STOP AFP(%s, %s)' % (id(task), afp), room=afp)
+            try:
+                task.uninit()
+            except EOFError:
+                pass
+            return
+        self.print('WARNING: AFP(%s) IS NOT RUNNING' % afp, room=afp)
 
     def api_resume(self, data):
         afp = data.get('at')
         inst = ins.ins_tasks.get(afp)
 
         if inst and inst.is_paused():
-            self.print('RESUME AFP(%s, %s)' % (id(inst), afp))
+            self.print('RESUME AFP(%s, %s)' % (id(inst), afp), room=afp)
             inst.resume()
             return
-        self.print('WARNING: AFP(%s) IS NOT RUNNING' % afp)
+        self.print('WARNING: AFP(%s) IS NOT RUNNING' % afp, room=afp)
 
     def api_pause(self, data):
         afp = data.get('at')
         inst = ins.ins_tasks.get(afp)
 
         if inst and inst.is_executing():
-            self.print('PAUSE AFP(%s, %s)' % (id(inst), afp))
+            self.print('PAUSE AFP(%s, %s)' % (id(inst), afp), room=afp)
             inst.pause()
             return
-        self.print('WARNING: AFP(%s) IS NOT RUNNING' % afp)
+        self.print('WARNING: AFP(%s) IS NOT RUNNING' % afp, room=afp)
 
     def api_execute(self, data):
         afp = data.get('at')
-        inst = ins.ins_tasks.get(afp)
+        task = ins.ins_tasks.get(afp)
 
         # executing
-        if inst and inst.is_executing():
-            self.print('WARNING: AFP(%s, %s) IS RUNNING' % (id(inst), afp))
+        if task and task.is_executing():
+            self.print('WARNING: AFP(%s, %s) IS RUNNING' % (id(task), afp), room=afp)
             return
         # paused
-        elif inst and inst.is_paused():
-            self.print('WARNING: AFP(%s, %s) IS PAUSED' % (id(inst), afp))
+        elif task and task.is_paused():
+            self.print('WARNING: AFP(%s, %s) IS PAUSED' % (id(task), afp), room=afp)
             return
         # stopped
-        elif inst:
-            inst.uninit()
+        elif task:
+            try:
+                task.uninit()
+            except EOFError:
+                pass
 
         # self.afp is required for self.print
         self.afp = afp
@@ -1420,123 +1477,133 @@ class MetaWebSocket(Namespace, MetaFile):
         except EOFError as _:
             pass
         except Exception as e:
-            self.print('ERROR: %s' % repr(e))
-            self.print('TRACE: %s' % traceback.format_exc())
+            self.print('ERROR: %s' % repr(e), room=afp)
+            self.print('TRACE: %s' % traceback.format_exc(), room=afp)
 
-        self.print('STOP: %s, %s' % (afp, datetime.datetime.now()))
+        self.print('STOP: %s, %s' % (afp, datetime.datetime.now()), room=afp)
         self.print('TOTAL COST: %s, %s' % (round(time.perf_counter() - ts1, 5),
-                                           round(time.time() - ts2, 5)))
-        inst = ins.ins_tasks.get(afp)
-        inst.stop()
+                                           round(time.time() - ts2, 5)), room=afp)
+        task = ins.ins_tasks.get(afp)
+        if task:
+            try:
+                task.uninit()
+            except EOFError:
+                pass
 
     def on_task(self, data):
         api = self.apis.get(data.get('action'))
         self.socketio.start_background_task(api, data)
 
 
-class MetaSocketIO(MetaFile):
-
-    def __init__(self, *args, **kwargs):
-        MetaFile.__init__(self)
-        Namespace.__init__(self, *args, **kwargs)
-        self.apis = {}
-        self.events = {}
-
-    def is_execute(self, afp):
-        pass
-
-    def on_connect(self):
-        return True
-
-    def on_disconnect(self):
-        pass
-
-    def on_join(self, data):
-        self.print('join: %s' % data)
-        afp = data.get('at')
-        join_room(afp)
-        inst = ins.ins_tasks.get(afp)
-        if inst and not inst.is_stopped():
-            self.progress(inst, afp)
-
-    def progress(self, inst, room):
-        if inst:
-            self.emit('progress', data={'status': inst.mc_status, 'at': room}, room=room)
-            # self.print('AFP(id %s) %s %s -> %s' % (id(inst), inst.afp, inst.mc_status, inst.mc_event))
-
-    def api_stop(self, data):
-        afp = data.get('at')
-        inst = ins.ins_tasks.get(afp)
-
-        if inst:
-            if inst.is_paused() or inst.is_executing():
-                self.print('STOP AFP(%s, %s)' % (id(inst), afp))
-                inst.stop()
-                return
-        self.print('WARNING: AFP(%s) IS NOT RUNNING' % afp)
-
-    def api_resume(self, data):
-        afp = data.get('at')
-        inst = ins.ins_tasks.get(afp)
-
-        if inst and inst.is_paused():
-            self.print('RESUME AFP(%s, %s)' % (id(inst), afp))
-            inst.resume()
-            return
-        self.print('WARNING: AFP(%s) IS NOT RUNNING' % afp)
-
-    def api_pause(self, data):
-        afp = data.get('at')
-        inst = ins.ins_tasks.get(afp)
-
-        if inst and inst.is_executing():
-            self.print('PAUSE AFP(%s, %s)' % (id(inst), afp))
-            inst.pause()
-            return
-        self.print('WARNING: AFP(%s) IS NOT RUNNING' % afp)
-
-    def api_execute(self, data):
-        afp = data.get('at')
-        inst = ins.ins_tasks.get(afp)
-
-        # executing
-        if inst and inst.is_executing():
-            self.print('WARNING: AFP(%s, %s) IS RUNNING' % (id(inst), afp))
-            return
-        # paused
-        elif inst and inst.is_paused():
-            self.print('WARNING: AFP(%s, %s) IS PAUSED' % (id(inst), afp))
-            return
-        # stopped
-        elif inst:
-            inst.uninit()
-
-        # self.afp is required for self.print
-        self.afp = afp
-        self.print('EXECUTE: %s, %s' % (afp, datetime.datetime.now()))
-        ts1 = time.perf_counter()
-        ts2 = time.time()
-
-        try:
-            action = data.get('action')
-            event = action.split(':')[-1].upper()
-            self.events[event](data)
-        except EOFError as _:
-            pass
-        except Exception as e:
-            self.print('ERROR: %s' % repr(e))
-            self.print('TRACE: %s' % traceback.format_exc())
-
-        self.print('STOP: %s, %s' % (afp, datetime.datetime.now()))
-        self.print('TOTAL COST: %s, %s' % (round(time.perf_counter() - ts1, 5),
-                                           round(time.time() - ts2, 5)))
-        inst = ins.ins_tasks.get(afp)
-        inst.stop()
-
-    def on_task(self, data):
-        api = self.apis.get(data.get('action'))
-        self.socketio.start_background_task(api, data)
-
-
-if __name__ == '__main__':
-    pass
+# class MetaSocketIO(MetaFile):
+#
+#     def __init__(self, *args, **kwargs):
+#         MetaFile.__init__(self)
+#         Namespace.__init__(self, *args, **kwargs)
+#         self.apis = {}
+#         self.events = {}
+#
+#     def is_execute(self, afp):
+#         pass
+#
+#     def on_connect(self):
+#         return True
+#
+#     def on_disconnect(self):
+#         pass
+#
+#     def on_join(self, data):
+#         self.print('join: %s' % data)
+#         afp = data.get('at')
+#         join_room(afp)
+#         inst = ins.ins_tasks.get(afp)
+#         if inst and not inst.is_stopped():
+#             self.progress(inst, afp)
+#
+#     def progress(self, task, room):
+#         if task:
+#             self.emit('progress', data={'status': task.mc_status, 'at': room}, room=room)
+#             # self.print('AFP(id %s) %s %s -> %s' % (id(inst), inst.afp, inst.mc_status, inst.mc_event))
+#
+#     def api_stop(self, data):
+#         afp = data.get('at')
+#         task = ins.ins_tasks.get(afp)
+#
+#         if task and (task.is_paused() or task.is_executing()):
+#             self.print('STOP AFP(%s, %s)' % (id(task), afp))
+#             try:
+#                 task.uninit()
+#             except EOFError:
+#                 pass
+#             return
+#         self.print('WARNING: AFP(%s) IS NOT RUNNING' % afp)
+#
+#     def api_resume(self, data):
+#         afp = data.get('at')
+#         inst = ins.ins_tasks.get(afp)
+#
+#         if inst and inst.is_paused():
+#             self.print('RESUME AFP(%s, %s)' % (id(inst), afp))
+#             inst.resume()
+#             return
+#         self.print('WARNING: AFP(%s) IS NOT RUNNING' % afp)
+#
+#     def api_pause(self, data):
+#         afp = data.get('at')
+#         inst = ins.ins_tasks.get(afp)
+#
+#         if inst and inst.is_executing():
+#             self.print('PAUSE AFP(%s, %s)' % (id(inst), afp))
+#             inst.pause()
+#             return
+#         self.print('WARNING: AFP(%s) IS NOT RUNNING' % afp)
+#
+#     def api_execute(self, data):
+#         afp = data.get('at')
+#         task = ins.ins_tasks.get(afp)
+#
+#         # executing
+#         if task and task.is_executing():
+#             self.print('WARNING: AFP(%s, %s) IS RUNNING' % (id(task), afp))
+#             return
+#         # paused
+#         elif task and task.is_paused():
+#             self.print('WARNING: AFP(%s, %s) IS PAUSED' % (id(task), afp))
+#             return
+#         # stopped
+#         elif task:
+#             try:
+#                 task.uninit()
+#             except EOFError:
+#                 pass
+#
+#         # self.afp is required for self.print
+#         self.afp = afp
+#         self.print('EXECUTE: %s, %s' % (afp, datetime.datetime.now()))
+#         ts1 = time.perf_counter()
+#         ts2 = time.time()
+#
+#         try:
+#             action = data.get('action')
+#             event = action.split(':')[-1].upper()
+#             self.events[event](data)
+#         except EOFError as _:
+#             pass
+#         except Exception as e:
+#             self.print('ERROR: %s' % repr(e))
+#             self.print('TRACE: %s' % traceback.format_exc())
+#
+#         self.print('STOP: %s, %s' % (afp, datetime.datetime.now()))
+#         self.print('TOTAL COST: %s, %s' % (round(time.perf_counter() - ts1, 5),
+#                                            round(time.time() - ts2, 5)))
+#
+#         task = ins.ins_tasks.get(afp)
+#         if task:
+#             try:
+#                 task.uninit()
+#             except EOFError:
+#                 pass
+#
+#     def on_task(self, data):
+#         api = self.apis.get(data.get('action'))
+#         self.socketio.start_background_task(api, data)

@@ -11,7 +11,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--ip', help='ip: 0.0.0.0', type=str, default='0.0.0.0')
-    parser.add_argument('--bp', help='all: %s' % bp_all, type=str, default='all')
+    parser.add_argument('--bp', help='all: %s' % bp_all, type=str, default=','.join(cons.APPS_DEFAULT))
     parser.add_argument('--port', help='port: 80', type=int, default=80)
 
     ars = parser.parse_args()
@@ -21,7 +21,9 @@ if __name__ == '__main__':
     bps_ins = (importlib.import_module(b + '.bp') for b in ins.ins_bps if b in cons.Apps.apps)
     bfs_ins = (importlib.import_module(b + '.before') for b in ins.ins_bps if b in cons.Apps.apps)
     [app_.register_blueprint(i.bp) for i in bps_ins]
-    [app_.before_first_request_funcs.extend(i.inits) for i in bfs_ins]
+    # [app_.before_first_request_funcs.extend(i.inits) for i in bfs_ins]
     print('bps:', ins.ins_bps)
-
-    socket_io.run(app_, host=ars.ip, port=int(ars.port), use_reloader=False)
+    try:
+        socket_io.run(app_, host=ars.ip, port=int(ars.port), use_reloader=False, allow_unsafe_werkzeug=True)
+    except TypeError as _:
+        socket_io.run(app_, host=ars.ip, port=int(ars.port), use_reloader=False)

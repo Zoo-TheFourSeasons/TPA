@@ -99,9 +99,12 @@ let DSPM = {
             let local_name = field.localName;
             let value;
             if (local_name === 'input') {
-                // checkbox
                 if (field.type === 'checkbox') {
+                    // checkbox
                     value = field.checked;
+                } else if (field.type === 'file') {
+                    // file
+                    value = field.files;
                 } else {
                     value = $(field).val();
                 }
@@ -270,9 +273,12 @@ let ModelFH = {
             let local_name = field.localName;
             let value;
             if (local_name === 'input') {
-                // checkbox
                 if (field.type === 'checkbox') {
+                    // checkbox
                     value = field.checked;
+                } else if (field.type === 'file') {
+                    // file
+                    value = field.files[0];
                 } else {
                     value = $(field).val();
                 }
@@ -346,12 +352,11 @@ function request(params) {
     }
 
     let config;
+    let tk = $.url().param('tk');
+    if (tk !== undefined) {
+        data['tk'] = tk
+    }
     if (method === "get") {
-        let tk = $.url().param('tk');
-        let u;
-        if (tk !== undefined) {
-            data['tk'] = tk
-        }
         config = {url: url, method: method, params: data, headers: header}
     } else if (method === 'post') {
         config = {url: url, method: method, data: data, headers: header}
@@ -386,6 +391,9 @@ function request(params) {
         .catch(function (error) {
             if (btn !== undefined) {
                 btn.attr('disabled', false);
+            }
+            if (error.response.status === 403) {
+                window.location.assign('/webs/login')
             }
             // console.log(error);
         });
@@ -688,17 +696,19 @@ function escape(srcString) {
 }
 
 function operateFormatter(value, row) {
-    if (row.isdir) {
+    if (row.isdir && row.app != 'file') {
         return ''
     }
     let ctx = '<div class="btn-group" role="group">';
     // star
-    if (row.star) {
-        ctx += '<button type="button" name="' + row.app + ',' + row.afp + '" class="btn btn-outline-danger btn-sm star_remove">';
-        ctx += '<i class="fa-solid fa-fw fa-heart"></i></button>';
-    } else {
-        ctx += '<button type="button" name="' + row.app + ',' + row.afp + '" class="btn btn-outline-info btn-sm star_favorite">';
-        ctx += '<i class="fa-solid fa-fw fa-heart"></i></button>';
+    if (!row.isdir) {
+        if (row.star) {
+            ctx += '<button type="button" name="' + row.app + ',' + row.afp + '" class="btn btn-outline-danger btn-sm star_remove">';
+            ctx += '<i class="fa-solid fa-fw fa-heart"></i></button>';
+        } else {
+            ctx += '<button type="button" name="' + row.app + ',' + row.afp + '" class="btn btn-outline-info btn-sm star_favorite">';
+            ctx += '<i class="fa-solid fa-fw fa-heart"></i></button>';
+        }
     }
     // dsp his
     if (row.app === 'dsp:yft' || row.app === 'dsp:yfd') {
@@ -724,6 +734,15 @@ function operateFormatter(value, row) {
         ctx += '<button disable type="button" class="btn btn-outline-info btn-sm">';
         ctx += '<i class="fa-solid fa-fw fa-toggle-on"></i></button>';
     }
+    //file
+    if (row.app === 'file' && row.isdir) {
+        ctx += '<a href="/file/check?target=' + row.afp + '&tk=' + tk + '" type="button" class="btn btn-outline-info btn-sm">';
+        ctx += '<i class="fa-solid fa-fw fa-user-check"></i></a>';
+
+        ctx += '<a target="_blank" href="/webs/file/expand?target=' + row.afp + '&tk=' + tk + '" type="button" class="btn btn-outline-info btn-sm">';
+        ctx += '<i class="fa-solid fa-fw fa-expand"></i></a>';
+    }
+
     ctx += '</div>';
     return ctx
 }
@@ -766,5 +785,21 @@ function detailFormatter(index, row) {
     ctx += 'ctime: ' + row.ctime + '<br>';
     ctx += 'mtime: ' + row.mtime + '<br>';
     return '<pre>' + ctx + '</pre>';
+}
+
+function nsfwFormatter(index, row) {
+    if (row.isdir) {
+        return ''
+    }
+    if (row.nsfw === '-'){
+        return '-'
+    }
+    if (row.nsfw >= 0.7){
+        return '<span class="bg-danger">' + row.nsfw + '</span>'
+    } else if (row.nsfw >= 0.5){
+        return '<span class="bg-warning">' + row.nsfw + '</span>'
+    }else {
+        return '<span class="bg-info">' + row.nsfw + '</span>'
+    }
 }
 

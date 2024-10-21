@@ -2,6 +2,7 @@
 """app
 """
 import os
+import logging
 
 from apscheduler import events
 from flask import Flask
@@ -22,7 +23,6 @@ def create_app():
     """
     _app = Flask(__name__, template_folder='bs5/templates', static_folder='bs5/static')
     _app.debug = True
-    _app.secret_key = 'x32dc5UTM6eWa8C3qgYRt12u7oiFwSrN'
     _app.config.update(
         WTF_CSRF_SECRET_KEY='x32dc5UTM6eWa8C3qgYRt12u7oiFwSrN',
         WTF_CSRF_TIME_LIMIT=14400,
@@ -84,7 +84,7 @@ scheduler.add_listener(job_submitted, events.EVENT_JOB_SUBMITTED)
 # init websocket
 socket_io = SocketIO(
     app_,
-    async_mode='threading',
+    # async_mode='threading',
     ping_timeout=6000,
     ping_interval=60
 )
@@ -128,18 +128,19 @@ def _(a, e):
         return jsonify({'status': False, 'message': 'app disabled: %s' % a})
 
     t = r.args.get('target', '')
-    if a in (cons.APP_ZOO, cons.APP_SEC, cons.APP_ENC) or e == cons.EDP_DF:
+    if a in (cons.APP_ZOO, cons.APP_SEC, cons.APP_ENC, cons.APP_FIL, cons.APP_SQU) or e == cons.EDP_DF:
         suffix = None
     else:
         suffix = '.' + e if e else a
     if a == cons.APP_TIM:
         from timing.assistant import TimingHelper as Ass
-        f = Ass.ldr
-    elif cons.APP_STA in ins.ins_bps:
+    elif a == cons.APP_STA:
         from star.assistant import StarHelper as Ass
-        f = Ass.ldr
+    elif a == cons.APP_FIL:
+        from file.assistant import FileHelper as Ass
     else:
-        f = MetaFile.ldr
+        Ass = MetaFile
+    f = Ass.ldr
     return jsonify(f(':'.join((a, e)) if e else a, t, r.args, suffix))
 
 
@@ -220,6 +221,29 @@ def _(a, e):
     return MetaFile.dd(':'.join((a, e)) if e else a, t)
 
 
+@app_.route('/<string:a>:<string:e>/upload', methods=['post'], endpoint='e_up')
+@app_.route('/<string:a>/upload', methods=['post'], defaults={'e': ''}, endpoint='up')
+@ind.wex
+@ind.rtk
+def _(a, e):
+    target = r.form.get('target', '')
+    file = r.files.get('file')
+    return jsonify(MetaFile.up(':'.join((a, e)) if e else a, target, file))
+
+
+@app_.route('/<string:a>:<string:e>/resize', methods=['get'], endpoint='e_rs')
+@app_.route('/<string:a>/resize', methods=['get'], defaults={'e': ''}, endpoint='rs')
+@ind.wex
+@ind.rtk
+def _(a, e):
+    target = r.args.get('target', '')
+    lt = r.args.get('lt')
+    rb = r.args.get('rb')
+    o = r.args.get('o')
+
+    return jsonify(MetaFile.rs(':'.join((a, e)) if e else a, target, lt, rb, o))
+
+
 @app_.route('/restart', methods=['get'], endpoint='restart')
 @ind.wex
 @ind.rtk
@@ -229,3 +253,34 @@ def _():
     print('restart:', _bps)
     ins.ins_que.put(_bps)
     return jsonify({'status': True, 'message': ', '.join(_bps)})
+
+
+class Hook4Scanner(object):
+    def __init__(self, app):
+        self.app = app
+        self.logger = logging.getLogger('Hook4Scanner')
+        self.logger.setLevel('INFO')
+        handler = logging.FileHandler('Hook4Scanner.log', encoding='UTF-8')
+        handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s'))
+        self.logger.addHandler(handler)
+
+    def __call__(self, environ, start_response):
+        protocol = environ.get('SERVER_PROTOCOL').upper()
+        method = environ.get('REQUEST_METHOD').upper()
+        addr = environ.get('REMOTE_ADDR')
+        uri = environ.get('REQUEST_URI')
+        if method in ('OPTIONS', 'CONNECT', 'HEAD', 'TRACE') or protocol not in ('HTTP/1.1',):
+            from werkzeug.wrappers import Response
+            self.logger.log(logging.ERROR, '%s %s %s %s' % (protocol, method, addr, uri))
+
+            return Response(b'', status=403)(environ, start_response)
+
+        def do_start_response(status, headers, exc_info=None):
+            if status.startswith('404') or status.startswith('400'):
+                self.logger.log(logging.ERROR, '%s %s %s %s %s' % (protocol, method, addr, uri, status))
+            return start_response(status, headers, exc_info)
+
+        return self.app(environ, do_start_response)
+
+
+app_.wsgi_app = Hook4Scanner(app_.wsgi_app)

@@ -13,8 +13,6 @@ from base import MetaFile
 import cons
 
 _ = Flask(__name__, template_folder='bs5/templates', static_folder='bs5/static')
-_.debug = True
-_.secret_key = 'x32dc5UTM6eWa8C3qgYRt12u7oiFwSrN'
 _.config.update(
     WTF_CSRF_SECRET_KEY='x32dc5UTM6eWa8C3qgYRt12u7oiFwSrN',
     WTF_CSRF_TIME_LIMIT=14400,

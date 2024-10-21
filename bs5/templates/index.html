@@ -40,7 +40,7 @@
 
 <script>
     function progress(data) {
-        let at = escape(data.at);
+        let rid = escape(data.at);
         let btns = data.btns;
         let status = data.status;
         if (status === 'EXECUTE') {
@@ -118,6 +118,13 @@
                             data-bs-placement="bottom" title="SIT">
                         <i class="fas fa-fw fa-sitemap"></i></button>
                 {% endif %}
+                {% if 'file' in _bps %}
+                    <button class="btn btn-outline-info rtk-btn{% if edp == 'file' %} active{% endif %}"
+                            name="/webs/file/index"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="bottom" title="FIL">
+                        <i class="fa-solid fa-fw fa-file"></i></button>
+                {% endif %}
                 {% if 'star' in _bps %}
                     <button class="btn btn-outline-info rtk-btn{% if edp == 'star' %} active{% endif %}"
                             name="/webs/star/index"
@@ -157,7 +164,13 @@
                        data-bs-placement="bottom" title="VOL">
                         <i class="fas fa-fw fa-people-group"></i></a>
                 {% endif %}
-
+                {% if 'squirrel' in _bps %}
+                    <button class="btn btn-outline-info rtk-btn{% if edp == 'squirrel' %} active{% endif %}"
+                            name="/webs/squirrel/index"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="bottom" title="SQU">
+                        <i class="fa-solid fa-fw fa-ethernet"></i></button>
+                {% endif %}
             </div>
         </div>
         <div class="col-lg-3 pb-0 pt-0">
@@ -184,33 +197,37 @@
         </div>
     </div>
     <div class="row bg-info m-0">
-        <div class="col-12 p-0">
-            <div class="p-1 float-start">
-                <div id="parents" class="mb-1 mt-0 ml-2"></div>
-            </div>
-            <div class="p-0 float-end">
+        <div class="col p-0">
+            <div id="parents" style="margin-left: 16px;height: 24px"></div>
+            <div class="btn-group">
                 {% block btns %}
-                    <div class="btn-group">
-                        <button id="max" class="btn btn-view-file" data-bs-toggle="tooltip"
-                                data-bs-placement="left"
-                                title="MAX">
-                            <i class="fa-solid fa-fw fa-window-maximize"></i></button>
-                        <button type="button" id="mkdir" class="btn" data-bs-toggle="modal"
-                                data-bs-placement="bottom" title="MKDIR"
-                                data-bs-target="#mkdir-modal"><i class="fas fa-fw fa-folder"></i>
-                        </button>
-                        <button type="button" id="touch" class="btn" data-bs-toggle="modal"
-                                data-bs-placement="bottom" title="TOUCH"
-                                data-bs-target="#touch-modal"><i class="fas fa-fw fa-add"></i>
-                        </button>
-                        <button disabled type="button" id="delete" class="btn check-files"
-                                data-bs-toggle="tooltip"
-                                data-bs-placement="bottom" title="DELETE"><i class="fas fa-fw fa-trash"></i>
-                        </button>
-                        {% block ops %}
-                        {% endblock %}
-
-                    </div>
+                    <button id="max" class="btn btn-view-file" data-bs-toggle="tooltip"
+                            data-bs-placement="left"
+                            title="MAX">
+                        <i class="fa-solid fa-fw fa-window-maximize"></i></button>
+                    <button type="button" id="mkdir" class="btn" data-bs-toggle="modal"
+                            data-bs-placement="bottom" title="MKDIR"
+                            data-bs-target="#mkdir-modal"><i class="fas fa-fw fa-folder"></i>
+                    </button>
+                    <button type="button" id="touch" class="btn" data-bs-toggle="modal"
+                            data-bs-placement="bottom" title="TOUCH"
+                            data-bs-target="#touch-modal"><i class="fas fa-fw fa-add"></i>
+                    </button>
+                    <button type="button" id="upload" class="btn" data-bs-toggle="modal"
+                            data-bs-placement="bottom" title="UPLOAD"
+                            data-bs-target="#upload-modal"><i class="fas fa-fw fa-upload"></i>
+                    </button>
+                    <button type="button" class="btn download"
+                            data-bs-placement="bottom" title="DOWNLOAD"><i class="fas fa-fw fa-download"></i>
+                    </button>
+                    <button disabled type="button" id="delete" class="btn check-files"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="bottom" title="DELETE"><i class="fas fa-fw fa-trash"></i>
+                    </button>
+                {% endblock %}
+            </div>
+            <div class="btn-group">
+                {% block ops %}
                 {% endblock %}
             </div>
         </div>
@@ -253,6 +270,9 @@
                         <th data-align="right" data-field="mtime" data-visible="false">MTIME</th>
                         <th data-align="right" data-field="size" data-visible="false">SIZE</th>
                         <th data-align="left" data-field="fn" data-formatter="fileViewFormatter">FILE</th>
+                        {% if a == 'file' %}
+                            <th data-align="left" data-formatter="nsfwFormatter" data-field="nsfw">NSFW</th>
+                        {% endif %}
                         <th data-align="left" data-formatter="operateFormatter" data-width="30px">OPS</th>
                     </tr>
                     </thead>
@@ -261,7 +281,7 @@
                 </table>
             </div>
         </div>
-        <div class="col-lg-10 p-0" id="div_vw">
+        <div class="col-lg-10 p-0" id="div_vw" style="border: 2px">
             <div id="viewer_md">
                 {% block view %}
                 {% endblock %}
@@ -285,7 +305,7 @@
                             class="fas fa-fw fa-bookmark"></i>
                     </button>
                 </div>
-                <h4 class="modal-title text-white" id="view-header">BOOKMARKS</h4>
+                <h4 class="modal-title text-white" id="v-header">BOOKMARKS</h4>
             </div>
             <div class="modal-body">
                 <select id="bookmarks"
@@ -365,7 +385,8 @@
                         <thead class="table-light">
                         <tr>
                             <th data-align="center" data-width="52px" data-formatter="iSpatio">NUM</th>
-                            <th data-align="center" data-formatter="operatesSpatio" data-width="100px">OPERATION</th>
+                            <th data-align="center" data-formatter="operatesSpatio" data-width="100px">OPERATION
+                            </th>
                             <th data-align="left" data-field="id" data-visible="false">ID</th>
                             <th data-align="left" data-field="spa">SPA</th>
                             <th data-align="right" data-field="size">SIZE</th>
@@ -550,11 +571,6 @@
         {# view callback #}
 
         function cb_view(rsp) {
-            let $vw = $("#viewer_md");
-            $vw.empty();
-            $vw.append('<div id="viewer"><textarea style="display:none;" class="form-control f-data" name="text" spellcheck="false" tabindex="0" wrap="off"></textarea></div>');
-            $vw.append('<img id="im" class="img-fluid" src="">');
-            $vw.append('<table class="table table-striped mb-0" data-search="false" id="dddd"><thead class="table-light"></thead><tbody></tbody></table>');
 
             let parents = rsp.data.parents;
             let $parents = $("#parents");
@@ -570,11 +586,28 @@
             ps.push("<strong>" + parents[parents.length - 1]['i'] + "</strong>");
             $parents.append(ps.join(' / '));
 
-            if (rsp.data.type === 'img') {
+            let $vw = $("#viewer_md");
+            console.log(rsp.data.rows)
+            $vw.empty();
+            if (rsp.data.type === 'vid') {
+                {# vid #}
+                $vw.append('<video width="600" height="900" controls><source id="vid" type="video/mp4"></video>');
+                let $vid = $('#vid');
+                $vid.attr("src", rsp.data.rows);
+            } else if (rsp.data.type === 'aud') {
+                {# aud #}
+                $vw.append('<audio controls><source id="aud" type="audio/mpeg"></audio>');
+                let $aud = $('#aud');
+                $aud.attr("src", rsp.data.rows);
+            } else if (rsp.data.type === 'img') {
+                {# img #}
+                $vw.append('<img id="im" class="img-fluid">');
                 let $img = $('#im');
                 $img.attr("src", rsp.data.rows);
                 $img.show();
             } else if (rsp.data.type === 'txt') {
+                {# txt #}
+                $vw.append('<div id="viewer"><textarea style="display:none;" class="form-control f-data" name="text" spellcheck="false" tabindex="0" wrap="off"></textarea></div>');
                 ins_vw = editormd('viewer', {
                     width: "100%",
                     height: $(document).height() - $div_tb.offset().top - 25,
@@ -590,6 +623,8 @@
 
                 });
             } else if (rsp.data.type === 'xls') {
+                {# xls #}
+                $vw.append('<table class="table table-striped mb-0" data-search="false" id="dddd"><thead class="table-light"></thead><tbody></tbody></table>');
                 let $ddd = $('#dddd');
                 $ddd.bootstrapTable('destroy');
                 $ddd.bootstrapTable({
@@ -602,7 +637,7 @@
                     pageSize: 20,
                     width: 667,
                     locale: "en-US",
-                    pageList: "[20]",
+                    pageList: "[20, 100, 300]",
                     pagination: true,
                 });
                 $ddd.show();
@@ -626,7 +661,7 @@
             } else {
                 edp = app;
             }
-
+            console.log(at)
             let uri = '/' + app + '/view?target=' + afp + '&tk=' + tk;
             $('.btn-view-file').each(function () {
                     this.removeAttribute('hidden');
@@ -647,8 +682,8 @@
                         get({
                             'url': '/' + app + '/index',
                             'data': {'target': rsp.data.parent},
-                            'success': function (rspp) {
-                                $table.bootstrapTable('load', rspp.data);
+                            'success': function (rsp2) {
+                                $table.bootstrapTable('load', rsp2.data);
                             }
                         })
                     }
@@ -661,14 +696,15 @@
                 app_io.close();
             }
             app_io = io.connect('http://' + document.domain + (location.port ? ":" + location.port : "") + '/' + app.split(':')[0], {'sync disconnect on unload': true});
-            app_io.emit('join', {'at': at});
+            app_io.emit('join', {'room': at});
             app_io.on('his', his);
             app_io.on('progress', progress);
         }
 
         function leave_room() {
             if (app_io !== undefined) {
-                app_io.close();
+                app_io.emit('leave', {'room': at})
+<!--                app_io.close();-->
             }
         }
 
@@ -777,9 +813,67 @@
 
         {# download #}
         $bd.on('click', '.download', function () {
-            let url = '/' + app + '/download?target=' + afp + '&tk=' + tk;
-            window.open(url);
-            console.info(url);
+            if (app == undefined) {
+                let data = $table.bootstrapTable('getSelections');
+                for (let i = 0; i < data.length; i++) {
+                    let url = '/' + data[i].app + '/download?target=' + data[i].afp + '&tk=' + tk;
+                    window.open(url);
+                    console.info(url);
+                }
+            } else {
+                let url = '/' + app + '/download?target=' + afp + '&tk=' + tk;
+                window.open(url);
+                console.info(url);
+            }
+        });
+
+        $bd.on('click', '.img-fluid', function (event) {
+            var x = event.pageX;
+            var y = event.pageY;
+            var position = $("#im").position();
+
+            let or = $("input[name='coordinate_0']")[0];
+            let lt = $("input[name='coordinate_lt']")[0];
+            let rb = $("input[name='coordinate_rb']")[0];
+            let cm = $("input[name='commit']")[0];
+
+            $(or).val(position.left + ',' + position.top)
+            if (lt.value === '') {
+                $(lt).val(x + ',' + y)
+            } else if (rb.value === '') {
+                $(rb).val(x + ',' + y)
+                if (cm.checked) {
+                    $('.btn-resize').click();
+                }
+            } else {
+                $(lt).val('')
+                $(rb).val('')
+            }
+        });
+        $bd.on('click', '.btn-resize', function (event) {
+            let or = $("input[name='coordinate_0']")[0].value;
+            let lt = $("input[name='coordinate_lt']")[0];
+            let rb = $("input[name='coordinate_rb']")[0];
+            if (or === '' || lt.value === '' || rb.value === '') {
+                alert('WARNING')
+            } else {
+                if (at == undefined) {
+                    alert('WARNING at')
+                } else {
+                    app = at.split(',')[0];
+                    afp = at.split(',')[1];
+                    get({
+                        'url': '/' + app + '/resize',
+                        'data': {'target': afp, 'lt': lt.value, 'rb': rb.value, 'o': or},
+                        'btn': $(".btn-resize"),
+                        'success': function (rsp) {
+                            $('button[name="' + at + '"]').click();
+                            $(lt).val('');
+                            $(rb).val('');
+                        }
+                    });
+                }
+            }
         });
 
         {# check uncheck #}

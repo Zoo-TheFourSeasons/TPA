@@ -50,6 +50,8 @@ def timer(func):
 
 def wraps_data_in_get(data: dict):
     tmp = {}
+    if not data:
+        return tmp
     for k, v in data.items():
         if isinstance(v, (dict, list, tuple)):
             tmp[k] = json.dumps(v)

@@ -17,6 +17,7 @@ APP_TIM = 'timing'
 APP_USR = 'user'
 APP_STA = 'star'
 APP_SPA = 'spatiotemporal'
+APP_FIL = 'file'
 
 EDP_DF = 'df'
 EDP_PY = 'py'
@@ -26,7 +27,7 @@ EDP_IM = 'image'
 class Apps(object):
     apps = {
         APP_SEC: (APP_SEC + ':tsunami', APP_SEC + ':suricata'),
-        # APP_ZOO: (APP_ZOO + ':images', ),
+        APP_ZOO: (APP_ZOO + ':images', ),
         APP_FIN: (APP_FIN + ':py', APP_FIN + ':df'),
         APP_KNO: (APP_KNO + ':site', APP_KNO + ':dom'),
         APP_DSP: (APP_DSP + ':yfd', APP_DSP + ':yft'),
@@ -34,7 +35,24 @@ class Apps(object):
         APP_ENC: (APP_ENC, ),
         APP_SQU: (APP_SQU, ),
         APP_TIM: (APP_TIM, ),
-        # APP_USR: (APP_USR, ),
+        APP_USR: (APP_USR, ),
         APP_STA: (APP_STA, ),
         APP_SPA: (APP_SPA, ),
+        APP_FIL: (APP_FIL, )
     }
+
+
+APPS_DEFAULT = (
+    APP_DSP,
+    APP_KNO,
+    APP_HIS,
+    APP_TIM,
+    # APP_ZOO,
+    APP_ENC,
+    APP_SPA,
+    APP_FIN,
+    APP_STA,
+    APP_SQU,
+    APP_FIL,
+    # APP_USR,
+)

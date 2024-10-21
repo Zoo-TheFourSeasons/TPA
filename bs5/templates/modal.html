@@ -241,7 +241,7 @@
                 <div class="input-group mb-2">
                     <span class="input-group-text">TARGET*</span>
                     <input type="text" class="form-control f-data" name="target" aria-label="PATH OUT">
-{#                    <span class="input-group-text">.yaml</span>#}
+                    {#                    <span class="input-group-text">.yaml</span>#}
                 </div>
                 <div class="mb-2" id="touch-editor">
                      <textarea class="form-control f-data" rows="40" name="text" spellcheck="false"
@@ -515,6 +515,34 @@
             </div>
             <div class="modal-footer px-2 pb-2">
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- UPLOAD Modal -->
+<div id="upload-modal" class="modal" tabindex="-1" aria-labelledby="upload-header"
+     style="display: none;" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+                <div class="modal-header bg-dark p-2">
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal"><i
+                                class="fas fa-fw fa-close"></i>
+                        </button>
+                        <button type="submit" class="btn btn-outline-warning commit-btn" data-bs-dismiss="modal">
+                            <i class="fas fa-fw fa-search"></i>UPLOAD
+                        </button>
+                    </div>
+                    <h4 class="modal-title text-white" id="scan-header">UPLOAD</h4>
+                </div>
+                <div class="modal-body px-2 pt-2 pb-0">
+                    <div class="mb-2">
+                        <label class="form-label">file*</label>
+                        <input type="file" class="form-control f-data" name="file" multiple>
+                    </div>
+                </div>
+                <div class="modal-footer px-2 pb-2">
+                </div>
         </div>
     </div>
 </div>
