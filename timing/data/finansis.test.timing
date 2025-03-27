@@ -1,0 +1,12 @@
+SETTING:
+  HOSTS:
+    LOCAL: '--ssh_user *** --ssh_psw ***'
+  NODES: [LOCAL]
+  TIMING:
+    STATUS: True
+    TRIGGER: '--trigger cron --month * --day * --hour * --minute 39 --second 0'
+COMMAND:
+  - FUNC: finansis.assistant.PYSHelper.timing
+    ARGS:
+      - finansis,py/test.py
+    KWARGS: {}

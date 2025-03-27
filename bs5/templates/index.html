@@ -77,78 +77,78 @@
             <div class="btn-group">
                 <button class="btn btn-outline-info rtk-btn{% if edp == 'home' %} active{% endif %}" name="/webs/home"
                         data-bs-toggle="tooltip"
-                        data-bs-placement="bottom" title="HOME">
+                        data-bs-placement="bottom" title="首页">
                     <i class="fas fa-fw fa-home"></i></button>
                 {% if 'dsp' in _bps %}
                     <button class="btn btn-outline-info rtk-btn{% if edp == 'yfd' %} active{% endif %}"
                             name="/webs/dsp:yfd/index"
                             data-bs-toggle="tooltip"
-                            data-bs-placement="bottom" title="YFD">
+                            data-bs-placement="bottom" title="部署">
                         <i class="fa-brands fa-fw fa-docker"></i></button>
                     <button class="btn btn-outline-info rtk-btn{% if edp == 'yft' %} active{% endif %}"
                             name="/webs/dsp:yft/index"
                             data-bs-toggle="tooltip"
-                            data-bs-placement="bottom" title="YFT">
+                            data-bs-placement="bottom" title="测试">
                         <i class="fa-solid fa-fw fa-flask-vial"></i></button>
                 {% endif %}
                 {% if 'finansis' in _bps %}
                     <button class="btn btn-outline-info rtk-btn{% if edp == 'py' %} active{% endif %}"
                             name="/webs/finansis:py/index" data-bs-toggle="tooltip"
-                            data-bs-placement="bottom" title="PY">
+                            data-bs-placement="bottom" title="脚本">
                         <i class="fa-brands fa-fw fa-python"></i></button>
                     <button class="btn btn-outline-info rtk-btn{% if edp == 'df' %} active{% endif %}"
                             name="/webs/finansis:df/index" data-bs-toggle="tooltip"
-                            data-bs-placement="bottom" title="DF">
+                            data-bs-placement="bottom" title="数据">
                         <i class="fas fa-fw fa-table"></i></button>
                 {% endif %}
                 {% if 'history' in _bps %}
                     <button class="btn btn-outline-info rtk-btn{% if edp == 'history' %} active{% endif %}"
                             name="/webs/history/index" data-bs-toggle="tooltip"
-                            data-bs-placement="bottom" title="HIS">
+                            data-bs-placement="bottom" title="历史">
                         <i class="fa-solid fa-fw fa-print"></i></button>
                 {% endif %}
                 {% if 'know' in _bps %}
                     <button class="btn btn-outline-info rtk-btn{% if edp == 'dom' %} active{% endif %}"
                             name="/webs/know:dom/index"
                             data-bs-toggle="tooltip"
-                            data-bs-placement="bottom" title="DOM">
+                            data-bs-placement="bottom" title="文档">
                         <i class="fas fa-fw fa-book"></i></button>
                     <button class="btn btn-outline-info rtk-btn{% if edp == 'site' %} active{% endif %}"
                             name="/webs/know:site/index" data-bs-toggle="tooltip"
-                            data-bs-placement="bottom" title="SIT">
+                            data-bs-placement="bottom" title="站点">
                         <i class="fas fa-fw fa-sitemap"></i></button>
                 {% endif %}
-                {% if 'file' in _bps %}
-                    <button class="btn btn-outline-info rtk-btn{% if edp == 'file' %} active{% endif %}"
-                            name="/webs/file/index"
+                {% if 'media' in _bps %}
+                    <button class="btn btn-outline-info rtk-btn{% if edp == 'media' %} active{% endif %}"
+                            name="/webs/media/index"
                             data-bs-toggle="tooltip"
-                            data-bs-placement="bottom" title="FIL">
-                        <i class="fa-solid fa-fw fa-file"></i></button>
+                            data-bs-placement="bottom" title="媒体">
+                        <i class="fa-solid fa-fw fa-video"></i></button>
                 {% endif %}
                 {% if 'star' in _bps %}
                     <button class="btn btn-outline-info rtk-btn{% if edp == 'star' %} active{% endif %}"
                             name="/webs/star/index"
                             data-bs-toggle="tooltip"
-                            data-bs-placement="bottom" title="STA">
+                            data-bs-placement="bottom" title="标记">
                         <i class="fa-solid fa-fw fa-heart"></i></button>
                 {% endif %}
                 {% if 'en_decrypt' in _bps %}
                     <button class="btn btn-outline-info rtk-btn{% if edp == 'en_decrypt' %} active{% endif %}"
                             name="/webs/en_decrypt/index" data-bs-toggle="tooltip"
-                            data-bs-placement="bottom" title="DEC">
+                            data-bs-placement="bottom" title="加密">
                         <i class="fa-solid fa-fw fa-shield-halved"></i></button>
                 {% endif %}
                 {% if 'timing' in _bps %}
                     <button class="btn btn-outline-info rtk-btn{% if edp == 'timing' %} active{% endif %}"
                             name="/webs/timing/index"
                             data-bs-toggle="tooltip"
-                            data-bs-placement="bottom" title="TIM">
+                            data-bs-placement="bottom" title="定时">
                         <i class="fa-solid fa-fw fa-clock"></i></button>
                 {% endif %}
                 {% if 'security' in _bps %}
                     <button class="btn btn-outline-info rtk-btn{% if edp == 'tsunami' %} active{% endif %}"
                             name="/webs/security:tsunami/index" data-bs-toggle="tooltip"
-                            data-bs-placement="bottom" title="TSU">
+                            data-bs-placement="bottom" title="扫描">
                         <i class="fas fa-fw fa-water"></i></button>
                     <button disabled class="btn btn-outline-info rtk-btn" name="/webs/security:snort/index"
                             data-bs-toggle="tooltip" data-bs-placement="bottom" title="SNO">
@@ -157,25 +157,25 @@
                 {% if 'zoo' in _bps %}
                     <button class="btn btn-outline-info rtk-btn{% if edp == 'images' %} active{% endif %}"
                             name="/webs/zoo:images/index" data-bs-toggle="tooltip"
-                            data-bs-placement="bottom" title="IMG">
+                            data-bs-placement="bottom" title="图片">
                         <i class="fas fa-fw fa-images"></i></button>
                     <a class="btn btn-outline-info" target="_blank"
                        href="https://zooatmospheregroup.github.io/Zoo-HZ-Media-Volunteers/" data-bs-toggle="tooltip"
-                       data-bs-placement="bottom" title="VOL">
+                       data-bs-placement="bottom" title="图集">
                         <i class="fas fa-fw fa-people-group"></i></a>
                 {% endif %}
                 {% if 'squirrel' in _bps %}
                     <button class="btn btn-outline-info rtk-btn{% if edp == 'squirrel' %} active{% endif %}"
                             name="/webs/squirrel/index"
                             data-bs-toggle="tooltip"
-                            data-bs-placement="bottom" title="SQU">
+                            data-bs-placement="bottom" title="采集">
                         <i class="fa-solid fa-fw fa-ethernet"></i></button>
                 {% endif %}
             </div>
         </div>
         <div class="col-lg-3 pb-0 pt-0">
             <select id="star-select" data-style="btn-light"
-                    data-title="STAR"
+                    data-title="标记"
                     data-live-search="true"
                     class="selectpicker form-control">
             </select>
@@ -186,19 +186,23 @@
                        placeholder="a | d | f | s | ns | ctx"
                        aria-describedby="search">
                 <button id="search" class="btn btn-outline-success" type="button" data-bs-toggle="tooltip"
-                        data-bs-placement="bottom" title="SEARCH"><i
+                        data-bs-placement="bottom" title="搜索"><i
                         class="fas fa-fw fa-search"></i></button>
                 {% if 'user' in _bps %}
                     <button class="btn btn-outline-info logout" data-bs-toggle="tooltip"
-                            data-bs-placement="bottom" title="LOGOUT">
+                            data-bs-placement="bottom" title="登出">
                         <i class="fa-solid fa-fw fa-right-from-bracket"></i></button>
                 {% endif %}
             </div>
         </div>
     </div>
     <div class="row bg-info m-0">
-        <div class="col p-0">
+        <div class="col-auto p-0">
             <div id="parents" style="margin-left: 16px;height: 24px"></div>
+        </div>
+    </div>
+    <div class="row bg-info m-0">
+        <div class="col-auto p-0">
             <div class="btn-group">
                 {% block btns %}
                     <button id="max" class="btn btn-view-file" data-bs-toggle="tooltip"
@@ -229,6 +233,20 @@
             <div class="btn-group">
                 {% block ops %}
                 {% endblock %}
+                <div class="input-group pl-5 pr-3 pic-resize invisible">
+                    <button class="btn btn-outline-secondary btn-resize" type="button" id="button-addon1"><i
+                            class="fas fa-fw fa-crop"></i>CROP</button>
+                    <input style="width:160px" type="text" name="coordinate_0" placeholder="Coordinate Origin"
+                           aria-label="Coordinate Origin" aria-describedby="button-addon1">
+                    <input style="width:120px" type="text" name="coordinate_lt" placeholder="Coordinate LT"
+                           aria-label="Coordinate LT" aria-describedby="button-addon1" readonly>
+                    <input style="width:120px" type="text" name="coordinate_rb" placeholder="Coordinate RB"
+                           aria-label="Coordinate RB" aria-describedby="button-addon1" readonly>
+                    <div class="input-group-text">
+                        <input class="form-check-input mt-0" name="commit" type="checkbox" value=""
+                               aria-label="commit right now">
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -262,7 +280,6 @@
                        data-page-list="[24]">
                     <thead class="table-light">
                     <tr>
-                        {#                    <th data-align="center" data-width="30px" data-formatter="iFormatter">N</th>#}
                         <th data-align="center" data-field="state" data-width="30px" data-checkbox="true"></th>
                         <th data-align="left" data-field="afp" data-visible="false">AFP</th>
                         <th data-align="left" data-field="app" data-visible="false">APP</th>
@@ -270,9 +287,6 @@
                         <th data-align="right" data-field="mtime" data-visible="false">MTIME</th>
                         <th data-align="right" data-field="size" data-visible="false">SIZE</th>
                         <th data-align="left" data-field="fn" data-formatter="fileViewFormatter">FILE</th>
-                        {% if a == 'file' %}
-                            <th data-align="left" data-formatter="nsfwFormatter" data-field="nsfw">NSFW</th>
-                        {% endif %}
                         <th data-align="left" data-formatter="operateFormatter" data-width="30px">OPS</th>
                     </tr>
                     </thead>
@@ -591,7 +605,7 @@
             $vw.empty();
             if (rsp.data.type === 'vid') {
                 {# vid #}
-                $vw.append('<video width="600" height="900" controls><source id="vid" type="video/mp4"></video>');
+                $vw.append('<video width="900" height="600" controls><source id="vid" type="video/mp4"></video>');
                 let $vid = $('#vid');
                 $vid.attr("src", rsp.data.rows);
             } else if (rsp.data.type === 'aud') {
@@ -605,6 +619,7 @@
                 let $img = $('#im');
                 $img.attr("src", rsp.data.rows);
                 $img.show();
+                $(".pic-resize").removeClass('invisible')
             } else if (rsp.data.type === 'txt') {
                 {# txt #}
                 $vw.append('<div id="viewer"><textarea style="display:none;" class="form-control f-data" name="text" spellcheck="false" tabindex="0" wrap="off"></textarea></div>');
@@ -620,8 +635,11 @@
                     theme: 'default',
                     mode: 'python',
                     path: "/static/editor.md/lib/",
-
                 });
+                $('.btn-view-file').each(function () {
+                    this.removeAttribute('hidden');
+                }
+            );
             } else if (rsp.data.type === 'xls') {
                 {# xls #}
                 $vw.append('<table class="table table-striped mb-0" data-search="false" id="dddd"><thead class="table-light"></thead><tbody></tbody></table>');
@@ -663,10 +681,6 @@
             }
             console.log(at)
             let uri = '/' + app + '/view?target=' + afp + '&tk=' + tk;
-            $('.btn-view-file').each(function () {
-                    this.removeAttribute('hidden');
-                }
-            );
 
             let $img = $('img');
             $img.hide();
@@ -875,7 +889,16 @@
                 }
             }
         });
-
+        $bd.on('click', '.btn-frame', function (event) {
+            let fp = this.name
+            get({
+                'url': '/' + Model.app + '/frame',
+                'data': {'target': fp},
+                'btn': $(".btn-frame"),
+                'success': function (rsp) {
+                }
+            })
+        });
         {# check uncheck #}
         $table.on('check.bs.table', function (e, row, $element) {
             $('.check-files').each(function () {

@@ -392,7 +392,7 @@ function request(params) {
             if (btn !== undefined) {
                 btn.attr('disabled', false);
             }
-            if (error.response.status === 403) {
+            if (error.status === 403) {
                 window.location.assign('/webs/login')
             }
             // console.log(error);
@@ -696,7 +696,7 @@ function escape(srcString) {
 }
 
 function operateFormatter(value, row) {
-    if (row.isdir && row.app != 'file') {
+    if (row.isdir && row.app != 'media') {
         return ''
     }
     let ctx = '<div class="btn-group" role="group">';
@@ -735,12 +735,17 @@ function operateFormatter(value, row) {
         ctx += '<i class="fa-solid fa-fw fa-toggle-on"></i></button>';
     }
     //file
-    if (row.app === 'file' && row.isdir) {
-        ctx += '<a href="/file/check?target=' + row.afp + '&tk=' + tk + '" type="button" class="btn btn-outline-info btn-sm">';
-        ctx += '<i class="fa-solid fa-fw fa-user-check"></i></a>';
-
-        ctx += '<a target="_blank" href="/webs/file/expand?target=' + row.afp + '&tk=' + tk + '" type="button" class="btn btn-outline-info btn-sm">';
-        ctx += '<i class="fa-solid fa-fw fa-expand"></i></a>';
+    if (row.app === 'media') {
+        if (row.isdir) {
+            ctx += '<a target="_blank" href="/webs/media/frame-location?target=' + row.afp + '&tk=' + tk + '" type="button" class="btn btn-outline-info btn-sm">';
+            ctx += '<i class="fa-solid fa-fw fa-location-dot"></i></a>';
+            ctx += '<a target="_blank" href="/webs/media/expand?target=' + row.afp + '&tk=' + tk + '" type="button" class="btn btn-outline-info btn-sm">';
+            ctx += '<i class="fa-solid fa-fw fa-expand"></i></a>';
+        }
+        if (row.video) {
+            ctx += '<button type="button" name="' + row.app + ',' + row.afp + '" class="btn btn-outline-info btn-sm btn-frame">';
+            ctx += '<i class="fa-solid fa-fw fa-photo-film"></i></button>';
+        }
     }
 
     ctx += '</div>';

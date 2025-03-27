@@ -1,0 +1,12 @@
+SETTING:
+  HOSTS:
+    LOCAL: '--ssh_user *** --ssh_psw ***'
+  NODES: [LOCAL]
+  TIMING:
+    STATUS: True
+    TRIGGER: '--trigger cron --month * --day * --hour 12,16,20 --minute 12 --second 0'
+COMMAND:
+  - FUNC: squirrel.assistant.GooHelper.timing
+    ARGS:
+      - 'squirrel,goofish/场景1.squ'
+    KWARGS: {}

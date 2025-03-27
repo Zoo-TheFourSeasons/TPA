@@ -1,0 +1,159 @@
+{% set title = 'Media' %}
+
+{% extends "index.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block ops %}
+    <button type="button" id="nsfw" class="btn"
+            data-bs-toggle="tooltip"
+            data-bs-placement="bottom" title="NSFW"><i class="fas fa-fw fa-shield"></i>
+    </button>
+    <button type="button" id="check" class="btn"
+            data-bs-toggle="tooltip"
+            data-bs-placement="bottom" title="CHECK"><i class="fas fa-fw fa-user-check"></i>
+    </button>
+    <button hidden id="commit" class="btn btn-view-file" data-bs-toggle="tooltip" data-bs-placement="bottom"
+            title="COMMIT">
+        <i class="fas fa-fw fa-code-commit"></i></button>
+    <button hidden class="btn spatiotemporal btn-view-file" data-bs-toggle="tooltip" data-bs-placement="bottom"
+            title="SPATIO">
+        <i class="fas fa-fw fa-space-shuttle"></i>
+    </button>
+    <button hidden id="execute" class="btn execute btn-view-file" data-bs-toggle="tooltip"
+            data-bs-placement="bottom"
+            title="EXECUTE"><i class="fas fa-fw fa-play"></i></button>
+    <button hidden id="execute_ctx" class="btn execute btn-view-file" data-bs-toggle="tooltip"
+            data-bs-placement="bottom" title="EXECUTE CTX"><i class="fas fa-fw fa-arrow-up-short-wide"></i>
+    </button>
+    <button hidden class="btn pause btn-view-file" data-bs-toggle="tooltip" data-bs-placement="bottom"
+            title="PAUSE">
+        <i class="fas fa-fw fa-pause"></i></button>
+    <button hidden class="btn resume btn-view-file" data-bs-toggle="tooltip" data-bs-placement="bottom"
+            title="RESUME">
+        <i class="fas fa-fw fa-play-circle"></i></button>
+    <button hidden class="btn stop btn-view-file" data-bs-toggle="tooltip" data-bs-placement="bottom"
+            title="STOP"><i
+            class="fas fa-fw fa-stop"></i></button>
+    <button hidden class="btn btn-view-file" data-bs-toggle="offcanvas" title="OUTPUT"
+            data-bs-placement="bottom"
+            data-bs-target="#his" aria-controls="offcanvasNavbar">
+        <i class="fas fa-fw fa-history"></i>
+    </button>
+{% endblock %}
+{% block js %}
+    <script>
+        let target = $.url().param('target');
+        let Model = Object.create(ModelFH);
+        Model.$table = $table;
+        Model.target = target;
+        Model.signal = 'task';
+        Model.app = 'media';
+        Model.font = {
+            'u': '/webs/' + Model.app + '/index'
+        };
+        Model.index = {
+            'u': '/' + Model.app + '/index',
+            'f': function () {
+                list_for_table(this, Model, undefined);
+            }
+        };
+        Model.mkdir = {
+            'u': '/' + Model.app + '/mkdir',
+            'modal_id': 'mkdir-modal',
+            '$btn': $("#mkdir-modal .commit-btn"),
+            'f': function () {
+                commit_from_model(this, Model, true)
+            }
+        };
+        Model.check = {
+            'u': '/' + Model.app + '/check',
+            '$btn': $("#check"),
+            'f': function () {
+                let that = this;
+                that.$btn.on('click', function () {
+                    let params = {'target': target};
+                    get({
+                        'url': that.u,
+                        'data': params,
+                        'btn': that.$btn,
+                        'success': function (rsp) {
+                            Model.$table.bootstrapTable('load', rsp.data);
+                        }
+                    });
+                });
+            }
+        };
+        Model.nsfw = {
+            'u': '/' + Model.app + '/nsfw',
+            '$btn': $("#nsfw"),
+            'f': function () {
+                let that = this;
+                that.$btn.on('click', function () {
+                    let params = {'target': target};
+                    get({
+                        'url': that.u,
+                        'data': params,
+                        'btn': that.$btn,
+                        'success': function (rsp) {
+                            Model.$table.bootstrapTable('load', rsp.data);
+                        }
+                    });
+                });
+            }
+        };
+        Model.upload = {
+            'u': '/' + Model.app + '/upload',
+            'modal_id': 'upload-modal',
+            '$btn': $("#upload-modal .commit-btn"),
+            'f': function () {
+                let that = this;
+                that.$btn.on('click', function () {
+                    let params = Model.json(that.modal_id);
+                    let tk = $.url().param('tk');
+                    let url = that.u
+                    if (tk !== undefined) {
+                        url = that.u + '?tk=' + tk
+                    }
+                    let fd = new FormData();
+                    fd.append('file', params.file);
+                    if (target != undefined) {
+                        fd.append('target', target);
+                    }
+                    post({
+                        'url': url,
+                        'data': fd,
+                        'btn': that.$btn,
+                        'success': function (rsp) {
+                            window.location.reload();
+                        }
+                    });
+                });
+            }
+        };
+        Model.touch = {
+            'u': '/' + Model.app + '/touch',
+            'suffix': '.yml',
+            'modal_id': 'touch-modal',
+            '$btn': $("#touch-modal .commit-btn"),
+            'f': function () {
+                commit_from_model(this, Model, true)
+            },
+        };
+        Model.deletes = {
+            'u': '/' + Model.app + '/delete',
+            '$btn': $("#delete"),
+            'f': function () {
+                confirm_do_with_table(this, Model, "DELETE");
+            }
+        };
+
+        $(document).ready(function () {
+            Model.nsfw.f();
+            Model.check.f();
+            Model.index.f();
+            Model.mkdir.f();
+            Model.touch.f();
+            Model.upload.f();
+            Model.deletes.f();
+        })
+    </script>
+{% endblock %}
