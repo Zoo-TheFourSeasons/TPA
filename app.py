@@ -128,7 +128,7 @@ def _(a, e):
         return jsonify({'status': False, 'message': 'app disabled: %s' % a})
 
     t = r.args.get('target', '')
-    if a in (cons.APP_ZOO, cons.APP_SEC, cons.APP_ENC, cons.APP_FIL, cons.APP_SQU) or e == cons.EDP_DF:
+    if a in (cons.APP_ZOO, cons.APP_SEC, cons.APP_ENC, cons.APP_MED, cons.APP_SQU) or e == cons.EDP_DF:
         suffix = None
     else:
         suffix = '.' + e if e else a
@@ -136,8 +136,8 @@ def _(a, e):
         from timing.assistant import TimingHelper as Ass
     elif a == cons.APP_STA:
         from star.assistant import StarHelper as Ass
-    elif a == cons.APP_FIL:
-        from file.assistant import FileHelper as Ass
+    elif a == cons.APP_MED:
+        from media.assistant import MediaHelper as Ass
     else:
         Ass = MetaFile
     f = Ass.ldr
@@ -239,9 +239,17 @@ def _(a, e):
     target = r.args.get('target', '')
     lt = r.args.get('lt')
     rb = r.args.get('rb')
-    o = r.args.get('o')
+    co = r.args.get('co')
+    return jsonify(MetaFile.rs(':'.join((a, e)) if e else a, target, lt, rb, co))
 
-    return jsonify(MetaFile.rs(':'.join((a, e)) if e else a, target, lt, rb, o))
+
+@app_.route('/<string:a>:<string:e>/json', methods=['get'], endpoint='e_js')
+@app_.route('/<string:a>/json', methods=['get'], defaults={'e': ''}, endpoint='js')
+@ind.wex
+@ind.rtk
+def _(a, e):
+    target = r.args.get('target', '')
+    return jsonify(MetaFile.js(':'.join((a, e)) if e else a, target))
 
 
 @app_.route('/restart', methods=['get'], endpoint='restart')

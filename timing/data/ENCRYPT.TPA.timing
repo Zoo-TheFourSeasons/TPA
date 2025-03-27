@@ -5,14 +5,13 @@ SETTING:
   TIMING:
     STATUS: False
     TRIGGER: '--trigger cron --year 2050 --month * --day * --day_of_week * --hour 0 --minute 0 --second 0'
-
 COMMAND:
   - FUNC: en_decrypt.assistant.EncryptHelper.timing
     ARGS:
       - en_decrypt
-      - TPA/zoo,TPA/user,TPA/timing/assistant.py,TPA/timing/bp.py,TPA/timing/before.py,TPA/star,TPA/squirrel,TPA/security,TPA/know,TPA/history,TPA/finansis,TPA/dsp,TPA/spatiotemporal,TPA/en_decrypt/data
+      - TPA/media,TPA/zoo,TPA/user,TPA/timing/assistant.py,TPA/timing/bp.py,TPA/timing/before.py,TPA/star,TPA/squirrel,TPA/security,TPA/know,TPA/history,TPA/finansis,TPA/dsp,TPA/spatiotemporal,TPA/en_decrypt/data
       - ENCRYPT
-      - /home/zin/Desktop/_Y/TOKEN/TPA.token
+      - /vms/PYL/_Y/TOKEN/TPA.token
     KWARGS: {}
 
 

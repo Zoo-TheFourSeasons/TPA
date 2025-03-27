@@ -13,7 +13,6 @@ from flask import request, make_response, redirect, url_for, jsonify
 import cons
 import ins
 
-
 _warning_cost = 3.14
 _logs = {
     # 'common': logging.getLogger('common'),
@@ -89,7 +88,9 @@ def rtk(func):
             if app and app not in ins.ins_bps:
                 return redirect('/webs/login')
             return func(*args, **kwargs)
+
         return _warp()
+
     return warp
 
 
@@ -126,7 +127,9 @@ def wex(func):
             except Exception as e:
                 print(traceback.format_exc())
                 return jsonify({'status': False, 'message': repr(e)})
+
         return _warp()
+
     return warp
 
 
@@ -140,7 +143,8 @@ def g_log(name):
         logger = logging.getLogger(name)
         logger.setLevel('INFO')
         handler = logging.FileHandler(name + '.log', encoding='UTF-8')
-        handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(filename)s %(funcName)s %(lineno)s %(message)s'))
+        handler.setFormatter(
+            logging.Formatter('%(asctime)s %(levelname)s %(filename)s %(funcName)s %(lineno)s %(message)s'))
         logger.addHandler(handler)
         _logs[name] = logger
     return _logs[name]
@@ -148,7 +152,6 @@ def g_log(name):
 
 def c4s(fd='common', threshold=0, echo=True, log=True):
     # cost4statistic
-
     def wrapper(func):
         fb = sys._getframe().f_back
         fn = fb.f_code.co_filename
@@ -174,6 +177,26 @@ def c4s(fd='common', threshold=0, echo=True, log=True):
                     else:
                         g_log(fd).info('%s %s:%s %s' % (cost, fn, num, func))
                 return rsp
+
+            return _wrap()
+
+        return wrap
+
+    return wrapper
+
+
+def exp(error=TimeoutError, retry=3):
+    def wrapper(func):
+        @wraps(func)
+        def wrap(*args, **kwargs):
+            def _wrap():
+                for i in range(retry):
+                    try:
+                        return func(*args, **kwargs)
+                    except error as _:
+                        pass
+                    except Exception as e:
+                        raise e
 
             return _wrap()
 

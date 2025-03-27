@@ -17,7 +17,7 @@ APP_TIM = 'timing'
 APP_USR = 'user'
 APP_STA = 'star'
 APP_SPA = 'spatiotemporal'
-APP_FIL = 'file'
+APP_MED = 'media'
 
 EDP_DF = 'df'
 EDP_PY = 'py'
@@ -38,7 +38,7 @@ class Apps(object):
         APP_USR: (APP_USR, ),
         APP_STA: (APP_STA, ),
         APP_SPA: (APP_SPA, ),
-        APP_FIL: (APP_FIL, )
+        APP_MED: (APP_MED, )
     }
 
 
@@ -53,6 +53,6 @@ APPS_DEFAULT = (
     APP_FIN,
     APP_STA,
     APP_SQU,
-    APP_FIL,
+    APP_MED,
     # APP_USR,
 )

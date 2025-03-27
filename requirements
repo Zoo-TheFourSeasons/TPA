@@ -40,4 +40,6 @@ opennsfw2
 tensorflow
 selenium
 imutils
-
+SpeechRecognition
+openai-whisper
+pydub

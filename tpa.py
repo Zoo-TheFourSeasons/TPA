@@ -6,6 +6,7 @@ from app import app_, socket_io
 import ins
 import cons
 
+
 if __name__ == '__main__':
     bp_all = list(cons.Apps.apps.keys())
 
@@ -19,9 +20,14 @@ if __name__ == '__main__':
     # register bp
     ins.ins_bps = bp_all if ars.bp == cons.APP_ALL else ars.bp.split(',')
     bps_ins = (importlib.import_module(b + '.bp') for b in ins.ins_bps if b in cons.Apps.apps)
-    bfs_ins = (importlib.import_module(b + '.before') for b in ins.ins_bps if b in cons.Apps.apps)
+
     [app_.register_blueprint(i.bp) for i in bps_ins]
-    # [app_.before_first_request_funcs.extend(i.inits) for i in bfs_ins]
+
+    bfs_ins = (importlib.import_module(b + '.before') for b in ins.ins_bps if b in cons.Apps.apps)
+    for bf in bfs_ins:
+        for f in bf.inits:
+            f()
+
     print('bps:', ins.ins_bps)
     try:
         socket_io.run(app_, host=ars.ip, port=int(ars.port), use_reloader=False, allow_unsafe_werkzeug=True)

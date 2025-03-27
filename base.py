@@ -21,7 +21,7 @@ import requests
 import cv2
 import numpy
 import yaml
-from flask_socketio import Namespace, join_room, leave_room, send
+from flask_socketio import Namespace, join_room
 from flask import send_from_directory
 
 import ins
@@ -189,11 +189,12 @@ def data_paging_for_pickle(request, _ins, key_name, exclude=None, fields=None):
 
 class MetaProcess(multiprocessing.Process):
 
-    def __init__(self, func, *args, **kwargs):
+    def __init__(self, func, daemon=False, *args, **kwargs):
         super(MetaProcess, self).__init__()
         self.func = func
         self.args = args
         self.kwargs = kwargs
+        self.daemon = daemon
 
     def run(self) -> None:
         self.func(*self.args, **self.kwargs)
@@ -221,8 +222,23 @@ class MetaFile(object):
         self.current_his = None
 
     @staticmethod
+    def __sort(x):
+        tmp = []
+        for ix in x:
+            if ix.isnumeric():
+                tmp.append(ix)
+            else:
+                if tmp:
+                    break
+        try:
+            v = int(''.join(tmp))
+        except:
+            v = id(''.join(tmp))
+        return v
+
+    @staticmethod
     def is_pic(fn):
-        return fn.lower().split('.')[-1] in ('jpg', 'jpeg', 'png')
+        return fn.lower().split('.')[-1] in ('jpg', 'jpeg', 'png', 'webp')
 
     @staticmethod
     def is_vid(fn):
@@ -231,6 +247,35 @@ class MetaFile(object):
     @staticmethod
     def is_aud(fn):
         return fn.lower().split('.')[-1] in ('wav', 'ogg', 'mp3')
+
+    @staticmethod
+    def is_html(fn):
+        return fn.lower().split('.')[-1] in ('html', )
+
+    @staticmethod
+    def is_yml(fn):
+        return fn.lower().split('.')[-1] in ('yml', )
+
+    @staticmethod
+    def is_json(fn):
+        return fn.lower().split('.')[-1] in ('json', )
+
+    @staticmethod
+    def get_tps(tps, func):
+        if isinstance(tps, str) and os.path.isdir(tps):
+            _tps = [os.path.join(r, fn) for r, d, fs in os.walk(tps) for fn in fs if func(fn)]
+        else:
+            _tps = []
+            for t in tps:
+                if os.path.isdir(t):
+                    _tps += [os.path.join(r, fn) for r, d, fs in os.walk(t) for fn in fs if func(fn)]
+                else:
+                    _tps.append(t)
+        return _tps
+
+    @staticmethod
+    def is_not_wav(fn):
+        return fn.lower().split('.')[-1] not in ('wav', )
 
     @staticmethod
     def is_xls(fn):
@@ -267,18 +312,23 @@ class MetaFile(object):
             for k, v in mix.items():
                 if k in pt:
                     pt = pt.replace(k, v)
-        room = room if room else self.afp
-        if room:
-            if isinstance(self, MetaWebSocket):
-                self.emit('his', data=html.escape(pt) + '\n', room=room)
-            if isinstance(self.ns, MetaWebSocket):
-                self.ns.emit('his', data=html.escape(pt) + '\n', room=room)
-        # print(pt)
-        current_his = None if 'current_his' not in self.__dict__ else self.current_his
-        if not current_his:
-            # print('WARNING: THERE IS NOT CURRENT_HIS')
-            return
+        afp = self.ins.afp if 'ins' in self.__dict__ else self.afp
+        room = room if room else afp
+        if isinstance(self, MetaWebSocket):
+            self.emit('his', data=html.escape(pt) + '\n', room=room)
+        elif 'ns' in self.__dict__ and isinstance(self.ns, MetaWebSocket):
+            self.ns.emit('his', data=html.escape(pt) + '\n', room=room)
+        elif 'ins' in self.__dict__ and isinstance(self.ins.ns, MetaWebSocket):
+            self.ins.ns.emit('his', data=html.escape(pt) + '\n', room=room)
 
+        if 'current_his' in self.__dict__ and self.current_his:
+            current_his = self.current_his
+        elif 'ins' in self.__dict__ and 'current_his' in self.ins.__dict__:
+            current_his = self.ins.current_his
+        else:
+            current_his = None
+        if not current_his:
+            return
         if nolog:
             wt = 'NOLOG IS True'
         else:
@@ -296,7 +346,7 @@ class MetaFile(object):
                 for k, v in mix.items():
                     if k in wt:
                         wt = wt.replace(k, v)
-        with open(current_his, 'a') as file:
+        with open(current_his, 'a', encoding='utf-8') as file:
             file.write(wt + '\n')
 
     @staticmethod
@@ -318,7 +368,9 @@ class MetaFile(object):
     def view_img(cls, t):
         with open(t, 'rb') as f:
             b64 = 'data:;base64,' + str(base64.b64encode(f.read()))[2:-1]
-            return {'status': True, 'rows': b64, 'is_image': True, 'type': 'img'}
+        h, w = cv2.imread(t).shape[:2]
+        return {'status': True, 'rows': b64, 'is_image': True,
+                'type': 'img', 'w': w, 'h': h}
 
     @classmethod
     def __view_txt(cls, t):
@@ -357,8 +409,6 @@ class MetaFile(object):
 
         rows = []
         for i, _row in df.iterrows():
-            if not i:
-                continue
             if offset and i + 2 < offset:
                 continue
             if limit and i + 2 > offset + limit:
@@ -417,7 +467,7 @@ class MetaFile(object):
             raise ValueError('unknown app: %s' % a)
         if a in (cons.APP_ENC, cons.APP_ZOO):
             return odn(PATH_PROJECT)
-        if a in (cons.APP_FIL, ):
+        if a in (cons.APP_MED, ):
             return '/file/data'
         dp = ojn(ojn(PATH_PROJECT, a), 'data')
         dp = dp if not e else ojn(dp, e)
@@ -470,6 +520,17 @@ class MetaFile(object):
 
     @classmethod
     @independence.timer
+    def df(cls, u, fp):
+        print(f'download: {u}, to: {fp}')
+        with requests.get(u, stream=True) as r:
+            r.raise_for_status()
+            with open(fp, 'wb') as f:
+                for chunk in r.iter_content(chunk_size=8192):
+                    if chunk:
+                        f.write(chunk)
+
+    @classmethod
+    @independence.timer
     def up(cls, app: str, target: str, file):
         fp = os.path.join(cls.a_dfp(app, target), file.filename)
         if os.path.exists(fp):
@@ -499,7 +560,6 @@ class MetaFile(object):
         canvas = numpy.zeros((hi, wi, 3), dtype=numpy.uint8)
         canvas[:hi, :wi] = frame[lty - oy: hi + lty - oy, ltx - ox: wi + ltx - ox]
         cv2.imwrite(fp, canvas)
-
         return {'status': True, 'b64': cls.view_img(fp)['rows']}
 
     @classmethod
@@ -529,7 +589,7 @@ class MetaFile(object):
                     'app': _app,
                     'afp': afp,
                     'id': afp,
-                    # 'tpa': [ii for ii in range(10)],
+                    'video': cls.is_vid(fn),
                 })
             return r
 
@@ -605,6 +665,13 @@ class MetaFile(object):
                 failed.append(fp)
                 message = 'failed in delete: %s' % e
         return {'status': False if failed else True, 'message': message}
+
+    @classmethod
+    @independence.timer
+    def js(cls, app: str, target: str) -> dict:
+        print('js', target, app)
+        fp = cls.a_dfp(app, target)
+        return json.load(open(fp, 'r'))
 
     @classmethod
     def __execute_sh(cls, fp):
@@ -798,11 +865,11 @@ class MetaFile(object):
         path_folder = ojn(path_output, folder)
         if not oex(path_folder):
             os.makedirs(path_folder)
-        print('path_folder: %s, tid: %s' % (path_folder, tid))
+        print(f'folder: {path_folder}, tid: {tid}')
 
         path_file = ojn(path_folder, tid + '.history')
-        if not oex(path_file):
-            print('get a new file: ', path_file)
+        # if not oex(path_file):
+        #     print('get a new file: ', path_file)
         return path_file
 
     @staticmethod
@@ -824,6 +891,7 @@ class MetaFile(object):
     def func_file(cls, path: str, func,
                   starts=None, contains=None, ends=None,
                   args=None, kwargs=None) -> None:
+        c = 0
         for r, ds, fs in os.walk(path):
             for f in fs:
                 if contains and not [f for contain in contains if contain in f]:
@@ -832,6 +900,7 @@ class MetaFile(object):
                     continue
                 if ends and not [f for end in ends if f.endswith(end)]:
                     continue
+                c += 1
                 cls.func_fp(ojn(r, f), func, args, kwargs)
 
     @classmethod
@@ -888,12 +957,28 @@ class MetaFile(object):
 
     @staticmethod
     def tsp(st=0, ed=None) -> str:
+        # 2024-11-04 19:21:19.881024
         v = str(datetime.datetime.now())
         v = v[st:] if ed is None else v[st:ed]
         return v.replace('-', '').replace(' ', '').replace(':', '')
 
     @classmethod
+    def check_exist_and_out_date(cls, ofp, do=(False, False)):
+        do_exist, check_date = do
+        if oex(ofp):
+            if not do_exist:
+                return True
+            if not check_date:
+                return True
+            date = cls.tsp(ed=10)
+            stmt = os.stat(ofp).st_mtime
+            if date == time.strftime('%Y%m%d', time.localtime(stmt)):
+                return True
+        return False
+
+    @classmethod
     def get_task_id(cls, fn_yaml) -> str:
+        # 2024-11-04 19:21:19.881024
         return '.'.join((cls.tsp(st=10), fn_yaml))
 
     @classmethod
@@ -931,7 +1016,6 @@ class MetaFile(object):
     def run_threads(_func, _params: list, _max: int = 20):
         threads = []
         for p in _params:
-            # print('_pm:', p)
             t = threading.Thread(target=_func, args=p.get('args', ()), kwargs=p.get('kwargs'))
             threads.append(t)
 
@@ -962,7 +1046,7 @@ class MetaFile(object):
 
     @classmethod
     def func_items(cls, value: dict, func, dumping=False):
-        # dumping can not been remove
+        # dumping can not been removed
         if not isinstance(value, dict):
             raise TypeError('!!! __VALUE TYPE ERROR')
 
@@ -1409,7 +1493,7 @@ class MetaWebSocket(Namespace, MetaFile):
             self.progress(inst, afp)
 
     def progress(self, inst, room):
-        if inst:
+        if inst and self.socketio:
             self.emit('progress', data={'status': inst.mc_status, 'at': room}, room=room)
 
     def api_stop(self, data):

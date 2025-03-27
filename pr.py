@@ -76,5 +76,6 @@ if __name__ == '__main__':
 
     ars = parser.parse_args()
     _.register_blueprint(bp)
-    _.before_first_request_funcs.extend(inits)
-    socket_io.run(_, host=ars.ip, port=int(ars.port), use_reloader=False)
+    for f in inits:
+        f()
+    socket_io.run(_, host=ars.ip, port=int(ars.port), use_reloader=False, allow_unsafe_werkzeug=True)
