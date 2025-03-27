@@ -1,0 +1,160 @@
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <title>{{ title }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="/static/fh/book-skull-solid.svg">
+    <link href="/static/bootstrap-5.1.3-dist/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+    <script src="/static/jquery/jquery-3.6.0.min.js"></script>
+    <script src="/static/bootstrap-5.1.3-dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/axios-0.27.2/dist/axios.min.js"></script>
+    <script src="/static/purl-v2.3.1/purl.js"></script>
+    <script src="/static/fh/business+.js"></script>
+    <style>
+        .grid-container {
+            position: relative;
+            display: inline-block;
+        }
+        .overlay {
+            position: absolute;
+            z-index: 1;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+<div class="menu-top sticky-top">
+    <div class="input-group">
+        <span class="input-group-text">FRAME-LOCATION</span>
+        <button class="btn btn-info remove-btn">REMOVE</button>
+        <select id="nums-select" name="nums" data-style="btn-light"
+                data-title="nums"
+                class="form-control">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="9">9</option>
+            <option value="18">18</option>
+            <option value="27">27</option>
+            <option value="36">36</option>
+            <option value="45">45</option>
+            <option value="54">54</option>
+        </select>
+        <input type="text" class="form-control" name="fn" placeholder="file name"
+               aria-label="fn" aria-describedby="button-addon1">
+        <input type="text" class="form-control" name="coordinate" placeholder="LT(0)+WH"
+               aria-label="LT(0)+WH" aria-describedby="button-addon2">
+        <input type="text" class="form-control" name="point1" placeholder="POINT LT"
+               aria-label="LT" aria-describedby="button-addon2">
+        <input type="text" class="form-control" name="point2" placeholder="POINT RB"
+               aria-label="RB" aria-describedby="button-addon3">
+    </div>
+</div>
+<div class="p-0 grid-container">
+</div>
+</body>
+<script>
+    let target = $.url().param('target');
+    let tk = $.url().param('tk');
+    let $bd = $("body");
+    let $vw = $(".grid-container");
+
+    get({
+        'url': '/media/frame-location?target=' + target + '&tk=' + tk,
+        'data': {},
+        'success': function (rsp) {
+            console.log(rsp)
+            let r;
+            for (let i = 0; i < rsp.data.rows.length - 1; i++) {
+                r = rsp.data.rows[i]
+                let img = '<img class="grid-item m-0 img-fluid"'
+                img += ' name="' + r.app + ',' + r.afp + '"'
+                img += ' width="' + r.w + '" height="' + r.h + '"'
+                img += ' src="' + r.b64 + '">'
+                let can = '<canvas class="overlay"'
+                can += ' id="' + r.app + ',' + r.afp + '"'
+                can += ' width="' + r.w + '" height="' + r.h + '"></canvas>'
+                $vw.append(can + img);
+            }
+        }
+    });
+
+    $bd.on('click', 'img', function (event) {
+        let x = event.pageX;
+        let y = event.pageY;
+        let fn = $("input[name='fn']")[0];
+        let coordinate = $("input[name='coordinate']")[0];
+        let point1 = $("input[name='point1']")[0];
+        let point2 = $("input[name='point2']")[0];
+        let nums = $("select[name='nums']")[0];
+
+        let position = $(this).position();
+        let target = this.name
+        let top = position.top + 38;
+        let vc = position.left + ',' + top + ',' + this.width + ',' + this.height
+
+        if (target !== fn.value) {
+            $(fn).val(target);
+            $(coordinate).val(vc);
+            $(point1).val(x + ',' + y);
+            $(point2).val('')
+        } else {
+            $(point2).val(x + ',' + y)
+            get({
+                'url': '/media/point',
+                'data': {'target': target, 'coordinate': vc, 'point1': point1.value,
+                         'point2': point2.value, 'nums': nums.value},
+                'success': function (rsp) {
+                    $(fn).val('');
+                    $(coordinate).val('');
+                    $(point1).val('');
+                    $(point2).val('');
+                    let px = rsp.data.x;
+                    let py = rsp.data.y;
+                    let pw = rsp.data.w;
+                    let ph = rsp.data.h;
+                    let canvas = $("canvas");
+                    let img = $("img");
+                    let index, can, im, ctx, pos;
+                    for (let i = 0; i < rsp.data.rows.length; i++) {
+                        index = rsp.data.rows[i]
+                        can = canvas[index]
+                        im = img[index]
+                        pos = $(im).position()
+                        $(can).css({'left': pos.left, 'top': pos.top})
+                        ctx = can.getContext('2d');
+                        ctx.clearRect(0, 0, im.width, im.height);
+                        ctx.strokeRect(px, py, pw, ph);
+                        console.log(index, px, py, pw, ph);
+                    }
+                },
+                'failed': function (rsp) {
+                    $(fn).val('');
+                    $(coordinate).val('');
+                    $(point1).val('');
+                    $(point2).val('');
+                    let canvas = $("canvas");
+                    let img = $("img");
+                    let index, can, im, ctx, pos;
+                    for (let i = 0; i < rsp.data.rows.length; i++) {
+                        index = rsp.data.rows[i]
+                        can = canvas[index]
+                        im = img[index]
+                        pos = $(im).position()
+                        $(can).css({'left': pos.left, 'top': pos.top})
+                        ctx = can.getContext('2d');
+                        ctx.clearRect(0, 0, im.width, im.height);
+                        console.log(index, im.width, im.height);
+                    }
+                }
+            });
+        }
+    });
+
+    $(document).ready(function () {
+
+    })
+</script>
